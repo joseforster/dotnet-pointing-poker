@@ -48,4 +48,18 @@ public class PointingPokerHub : Hub
 
         await base.OnDisconnectedAsync(exception);
     }
+
+    public async Task OnCloseTheTab(string username)
+    {
+        var userHubModel = _userHubModelList.FirstOrDefault(f => f.Username == username);
+
+        if (userHubModel != null)
+        {
+            _userHubModelList.Remove(userHubModel);
+
+            await this.Clients.Others.SendAsync("UserHubDisconnected", userHubModel);
+        }
+
+        await base.OnDisconnectedAsync(new Exception());
+    }
 }

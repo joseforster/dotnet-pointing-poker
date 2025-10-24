@@ -1,50 +1,86 @@
 ﻿"use strict";
 
-var username = document.getElementById("username").textContent;
+var username = document.getElementById("my-username").textContent;
 
 var connection = new signalR.HubConnectionBuilder().withUrl("/pointingpokerhub?username=" + username).build();
 
-//Disable the send button until connection is established.
-//document.getElementById("sendButton").disabled = true;
-
-connection.on("UserHubConnected", function ({ username, connectionId }) {
-    console.log("Alguém novo conectou: " + username);
-    var li = document.createElement("li");
-    document.getElementById("lista-usuarios").appendChild(li);
-    li.textContent = username;
-    li.id = connectionId;
+connection.on("UserHubConnected", function (user) {
+    addUser(user);
 });
 
 connection.on("UserHubConnectedList", function (users) {
-    console.log("Recebi evento UserHubConnectedList " + users);
     users.forEach(user => {
-        console.log(user.username);
-        var li = document.createElement("li");
-        document.getElementById("lista-usuarios").appendChild(li);
-        li.textContent = user.username;
-        li.id = user.connectionId;
+        addUser(user);
     });
 });
 
-connection.on("UserHubDisconnected", function ({ connectionId }) {
-    console.log("UserHubDisconnected -->" + connection);
-    var element = document.getElementById(connectionId);
+connection.on("UserHubDisconnected", function (user) {
+    console.log("UserHubDisconnected -->" + user.username);
+    var element = document.getElementById("username-" + user.connectionId);
     element.remove();
 });
 
-
-
 connection.start().then(function () {
-    //document.getElementById("sendButton").disabled = false;
 }).catch(function (err) {
     return console.error(err.toString());
 });
 
-// document.getElementById("sendButton").addEventListener("click", function (event) {
-//     var user = document.getElementById("userInput").value;
-//     var message = document.getElementById("messageInput").value;
-//     connection.invoke("SendMessage", user, message).catch(function (err) {
-//         return console.error(err.toString());
-//     });
-//     event.preventDefault();
-// });
+window.addEventListener("beforeunload", () => {
+    connection.invoke("OnCloseTheTab", username);
+});
+
+document.getElementsByName("vote-button-success").forEach(btn =>
+    btn.addEventListener(("click"), function () {
+        addVote(btn.textContent, "text-bg-success");
+    })
+);
+
+document.getElementsByName("vote-button-warning").forEach(btn =>
+    btn.addEventListener(("click"), function () {
+        addVote(btn.textContent, "text-bg-warning");
+    })
+);
+
+document.getElementsByName("vote-button-danger").forEach(btn =>
+    btn.addEventListener(("click"), function () {
+        addVote(btn.textContent, "text-bg-danger");
+    })
+);
+
+document.getElementById("empty-vote-button").addEventListener("click", function () {
+    addVote("?", "text-bg-dark");
+});
+
+
+function addVote(voteValue, className) {
+    let list = ["text-bg-success", "text-bg-warning", "text-bg-danger", "text-bg-dark"];
+
+    let myVote = document.getElementById("my-vote");
+
+    myVote.classList.remove(...list);
+    myVote.classList.add(className);
+    myVote.textContent = voteValue;
+}
+
+function addUser(user) {
+
+    console.log("Alguém novo conectou: " + user.username);
+
+    var li = document.createElement("li");
+
+    li.classList.add("list-group-item");
+    li.classList.add("d-flex");
+    li.classList.add("justify-content-between");
+    li.classList.add("align-items-center");
+    li.textContent = user.username;
+    li.id = "username-" + user.connectionId;
+
+    document.getElementById("user-list").appendChild(li);
+
+    var span = document.createElement("span");
+    span.classList.add("badge");
+    span.classList.add("big-badge");
+    span.id = "vote-" + user.connectionId;
+
+    li.appendChild(span);
+}
