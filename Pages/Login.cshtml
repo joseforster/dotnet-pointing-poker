@@ -1,0 +1,21 @@
+@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Login";
+}
+
+<form method="post" class="d-flex justify-content-center align-items-center" style="min-height: calc(100vh - 150px);">
+    <div class=" card shadow-lg border-0 rounded-4" style="min-width: 320px;">
+        <div class="card-body p-4">
+            <div class="mb-3">
+                <label for="usernameInput" class="form-label fw-semibold">Username</label>
+                <input type="text" class="form-control" id="usernameInput" name="username" required
+                    placeholder="Enter your username">
+                <div class="invalid-feedback">Username is required.</div>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Login</button>
+            </div>
+        </div>
+    </div>
+</form>
