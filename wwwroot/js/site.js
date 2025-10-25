@@ -8,6 +8,21 @@ connection.on("UserHubConnected", function (user) {
     addUser(user);
 });
 
+connection.on("UserHasVoted", function (connectionId) {
+
+    console.log("user votou --> " + connectionId);
+    var span = document.getElementById("vote-" + connectionId);
+
+    span.classList.add("text-bg-primary");
+    span.textContent = "OK";
+
+    let li = document.getElementById("username-" + connectionId);
+
+    li.classList.remove("flash");
+    void li.offsetWidth; // force reflow to restart animation
+    li.classList.add("flash");
+})
+
 connection.on("UserHubConnectedList", function (users) {
     users.forEach(user => {
         addUser(user);
@@ -15,7 +30,7 @@ connection.on("UserHubConnectedList", function (users) {
 });
 
 connection.on("UserHubDisconnected", function (user) {
-    console.log("UserHubDisconnected -->" + user.username);
+    console.log("UserHubDisconnected -->" + connection.connectionId);
     var element = document.getElementById("username-" + user.connectionId);
     element.remove();
 });
@@ -26,7 +41,7 @@ connection.start().then(function () {
 });
 
 window.addEventListener("beforeunload", () => {
-    connection.invoke("OnCloseTheTab", username);
+    connection.invoke("OnClosedTheTab", username);
 });
 
 document.getElementsByName("vote-button-success").forEach(btn =>
@@ -60,6 +75,8 @@ function addVote(voteValue, className) {
     myVote.classList.remove(...list);
     myVote.classList.add(className);
     myVote.textContent = voteValue;
+
+    connection.invoke("OnUserVoted", voteValue);
 }
 
 function addUser(user) {
@@ -81,6 +98,11 @@ function addUser(user) {
     span.classList.add("badge");
     span.classList.add("big-badge");
     span.id = "vote-" + user.connectionId;
+
+    if (user.hasVoted) {
+        span.classList.add("text-bg-primary");
+        span.textContent = "OK";
+    }
 
     li.appendChild(span);
 }

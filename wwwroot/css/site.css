@@ -39,3 +39,19 @@ body {
 .big-badge {
   font-size: x-large;
 }
+
+.flash {
+  animation: flashColor 1.2s ease-out;
+}
+
+@keyframes flashColor {
+  0% {
+    background-color: #0d6efd;
+    /* bright yellow highlight */
+  }
+
+  100% {
+    background-color: transparent;
+    /* fade back to normal */
+  }
+}

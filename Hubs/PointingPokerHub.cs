@@ -1,9 +1,10 @@
+using System.Diagnostics;
 using Microsoft.AspNetCore.SignalR;
 
 public class PointingPokerHub : Hub
 {
     private static List<UserHubModel> _userHubModelList = new List<UserHubModel>();
-    private SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
+    private static readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
 
     public override async Task OnConnectedAsync()
     {
@@ -13,7 +14,7 @@ public class PointingPokerHub : Hub
 
         if (string.IsNullOrEmpty(username))
         {
-            return;
+            username = "Visitor";
         }
 
         await this.Clients.Caller.SendAsync("UserHubConnectedList", _userHubModelList);
@@ -37,29 +38,50 @@ public class PointingPokerHub : Hub
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        var userHubModel = _userHubModelList.FirstOrDefault(f => f.ConnectionId == this.Context.ConnectionId);
-
-        if (userHubModel != null)
-        {
-            _userHubModelList.Remove(userHubModel);
-
-            await this.Clients.Others.SendAsync("UserHubDisconnected", userHubModel);
-        }
-
-        await base.OnDisconnectedAsync(exception);
+        await DisconnectUser(exception);
     }
 
-    public async Task OnCloseTheTab(string username)
+    public async Task OnClosedTheTab()
     {
-        var userHubModel = _userHubModelList.FirstOrDefault(f => f.Username == username);
+        await DisconnectUser();
+    }
+
+    private async Task DisconnectUser(Exception? exception = null)
+    {
+        var userHubModel = GetCurrentUserHubModel();
 
         if (userHubModel != null)
         {
-            _userHubModelList.Remove(userHubModel);
+            await _semaphoreSlim.WaitAsync();
+
+            userHubModel = GetCurrentUserHubModel();
+
+            if (userHubModel != null)
+            {
+                _userHubModelList.Remove(userHubModel);
+            }
+
+            _semaphoreSlim.Release();
 
             await this.Clients.Others.SendAsync("UserHubDisconnected", userHubModel);
         }
 
-        await base.OnDisconnectedAsync(new Exception());
+        await base.OnDisconnectedAsync(exception ?? new Exception());
+    }
+
+    public async Task OnUserVoted(string userVote)
+    {
+        Console.WriteLine("User voted --> " + userVote);
+
+        var userHubModel = GetCurrentUserHubModel();
+
+        userHubModel.SetCurrentVote(userVote);
+
+        await this.Clients.Others.SendAsync("UserHasVoted", this.Context.ConnectionId);
+    }
+
+    private UserHubModel GetCurrentUserHubModel()
+    {
+        return _userHubModelList.FirstOrDefault(f => f.ConnectionId == this.Context.ConnectionId);
     }
 }
