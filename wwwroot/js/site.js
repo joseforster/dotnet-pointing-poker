@@ -19,7 +19,7 @@ connection.on("UserHasVoted", function (connectionId) {
     let li = document.getElementById("username-" + connectionId);
 
     li.classList.remove("flash");
-    void li.offsetWidth; // force reflow to restart animation
+    void li.offsetWidth;
     li.classList.add("flash");
 })
 
@@ -35,9 +35,17 @@ connection.on("UserHubDisconnected", function (user) {
     element.remove();
 });
 
+connection.on("ShowVotes", function (users) {
+    users.forEach(user => {
+        let span = document.getElementById("vote-" + user.connectionId);
+
+        span.textContent = user.currentVote;
+    });
+});
+
 connection.start().then(function () {
 }).catch(function (err) {
-    return console.error(err.toString());
+    return alert(err.toString());
 });
 
 window.addEventListener("beforeunload", () => {
@@ -64,6 +72,10 @@ document.getElementsByName("vote-button-danger").forEach(btn =>
 
 document.getElementById("empty-vote-button").addEventListener("click", function () {
     addVote("?", "text-bg-dark");
+});
+
+document.getElementById("btn-show-votes").addEventListener("click", function () {
+    connection.invoke("OnShowVotes");
 });
 
 

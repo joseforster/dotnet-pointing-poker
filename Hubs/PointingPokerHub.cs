@@ -6,6 +6,8 @@ public class PointingPokerHub : Hub
     private static List<UserHubModel> _userHubModelList = new List<UserHubModel>();
     private static readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
 
+    private static bool _isVotesBeingShowed = false;
+
     public override async Task OnConnectedAsync()
     {
         await base.OnConnectedAsync();
@@ -75,13 +77,41 @@ public class PointingPokerHub : Hub
 
         var userHubModel = GetCurrentUserHubModel();
 
-        userHubModel.SetCurrentVote(userVote);
+        decimal parsedVote;
 
-        await this.Clients.Others.SendAsync("UserHasVoted", this.Context.ConnectionId);
+        decimal.TryParse(userVote, out parsedVote);
+
+        userHubModel.CurrentVote = parsedVote;
+
+        if (_isVotesBeingShowed)
+        {
+
+        }
+        else
+        {
+            await this.Clients.Others.SendAsync("UserHasVoted", this.Context.ConnectionId);
+        }
+
+    }
+
+    public async Task OnShowVotes()
+    {
+        await SetIsVotesBeingShowed(true);
+
+        await this.Clients.All.SendAsync("ShowVotes", _userHubModelList);
     }
 
     private UserHubModel GetCurrentUserHubModel()
     {
         return _userHubModelList.FirstOrDefault(f => f.ConnectionId == this.Context.ConnectionId);
+    }
+
+    private async Task SetIsVotesBeingShowed(bool isVotesBeingShowed)
+    {
+        await _semaphoreSlim.WaitAsync();
+
+        _isVotesBeingShowed = isVotesBeingShowed;
+
+        _semaphoreSlim.Release();
     }
 }

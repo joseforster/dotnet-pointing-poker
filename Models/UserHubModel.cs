@@ -8,28 +8,11 @@ public class UserHubModel
         Username = username;
     }
 
-    private readonly object _lockObject = new object();
-
     public string ConnectionId { get; set; }
 
     public string Username { get; set; }
 
-    public bool HasVoted => _currentVote != 0;
+    public decimal CurrentVote { get; set; }
 
-    private decimal _currentVote;
-
-    public void SetCurrentVote(string vote)
-    {
-        lock (_lockObject)
-        {
-            decimal parsedVote;
-
-            if (!decimal.TryParse(vote, out parsedVote))
-            {
-                parsedVote = 0;
-            }
-
-            this._currentVote = parsedVote;
-        }
-    }
+    public bool HasVoted => CurrentVote != 0;
 }

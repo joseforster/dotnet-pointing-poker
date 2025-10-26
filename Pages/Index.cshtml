@@ -13,38 +13,45 @@
                 </div>
             </div>
         </div>
-        <div class="d-flex gap-2 m-2">
-            <button type="button" class="btn btn-outline-primary p-2 w-100">Show Votes</button>
-            <button type="button" class="btn btn-outline-secondary w-100">Clear Votes</button>
+        <div class="row m-2">
+            <button type="button" id="btn-show-votes" class="btn btn-outline-primary p-3 w-100">Show Votes</button>
+        </div>
+        <div class="row m-2">
+            <button type="button" id="btn-clear-votes" class="btn btn-outline-secondary p-3 w-100">Clear Votes</button>
         </div>
         <div class="d-flex gap-2 m-2">
-            <button type="button" name="vote-button-success" class="btn btn-success w-100 p-2">0.5</button>
+            <button type="button" name="vote-button-success" class="btn btn-success w-100 p-3">0.5</button>
             <button type="button" name="vote-button-success" class="btn btn-success w-100">1</button>
             <button type="button" name="vote-button-success" class="btn btn-success w-100">2</button>
-            <button type="button" name="vote-button-success" class="btn btn-success w-100">4</button>
         </div>
         <div class="d-flex gap-2 m-2">
-            <button type="button" name="vote-button-warning" class="btn btn-warning w-100 p-2">8</button>
+            <button type="button" name="vote-button-warning" class="btn btn-warning w-100 p-3">4</button>
+            <button type="button" name="vote-button-warning" class="btn btn-warning w-100 ">8</button>
             <button type="button" name="vote-button-warning" class="btn btn-warning w-100 ">16</button>
-            <button type="button" name="vote-button-warning" class="btn btn-warning w-100 ">24</button>
-            <button type="button" name="vote-button-warning" class="btn btn-warning w-100 ">32</button>
+
         </div>
         <div class="d-flex gap-2 m-2">
-            <button type="button" name="vote-button-danger" class="btn btn-danger w-100 p-2">40</button>
-            <button type="button" name="vote-button-danger" class="btn btn-danger w-100 ">60</button>
+            <button type="button" name="vote-button-warning" class="btn btn-warning w-100 p-3">24</button>
+            <button type="button" name="vote-button-warning" class="btn btn-warning w-100 ">32</button>
+            <button type="button" name="vote-button-warning" class="btn btn-warning w-100">40</button>
+        </div>
+        <div class="d-flex gap-2 m-2">
+            <button type="button" name="vote-button-danger" class="btn btn-danger w-100 p-3 ">60</button>
             <button type="button" name="vote-button-danger" class="btn btn-danger w-100 ">80</button>
             <button type="button" name="vote-button-danger" class="btn btn-danger w-100 ">100</button>
         </div>
         <div class="d-flex gap-2 m-2">
-            <button type="button" id="empty-vote-button" class="btn btn-outline-dark p-2 w-100">I have no ideia what
+            <button type="button" id="empty-vote-button" class="btn btn-outline-dark p-3 w-100">I have no ideia what
                 you guys are talking
                 about.</button>
         </div>
+    </div>
+    <div class="col">
         <div id="users" class="row m-2">
-            <ul class="list-group w-25" id="user-list">
+            <ul class="list-group w-100" id="user-list">
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <strong id="my-username">@Model.Username</strong>
-                    <span id="my-vote" class="badge big-badge">14</span>
+                    <span id="my-vote" class="badge big-badge"></span>
                 </li>
             </ul>
         </div>
