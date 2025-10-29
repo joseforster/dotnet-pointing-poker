@@ -1,49 +1,90 @@
 ﻿"use strict";
 
+let voteButtonClassList = ["text-bg-success", "text-bg-warning", "text-bg-danger", "text-bg-dark", "text-bg-primary"];
+
 var username = document.getElementById("my-username").textContent;
 
 var connection = new signalR.HubConnectionBuilder().withUrl("/pointingpokerhub?username=" + username).build();
 
-connection.on("UserHubConnected", function (user) {
+connection.on("UserConnected", function (user) {
     addUser(user);
 });
 
 connection.on("UserHasVoted", function (connectionId) {
 
     console.log("user votou --> " + connectionId);
-    var span = document.getElementById("vote-" + connectionId);
+    var userVote = document.getElementById("user-vote-" + connectionId);
 
-    span.classList.add("text-bg-primary");
-    span.textContent = "OK";
+    userVote.classList.add("text-bg-primary");
+    userVote.textContent = "OK";
 
-    let li = document.getElementById("username-" + connectionId);
+    let userListItem = document.getElementById("user-list-item-" + connectionId);
 
-    li.classList.remove("flash");
-    void li.offsetWidth;
-    li.classList.add("flash");
+    userListItem.classList.remove("flash");
+    void userListItem.offsetWidth;
+    userListItem.classList.add("flash");
 })
 
-connection.on("UserHubConnectedList", function (users) {
+connection.on("UserHasVotedWithShowedVotes", function (user) {
+    console.log("Votos abertos: " + user.username + " -- > " + user.currentVote);
+
+    var userVote = document.getElementById("user-vote-" + user.connectionId);
+
+    userVote.classList.add("text-bg-primary");
+    userVote.textContent = user.currentVote;
+
+    let userListItem = document.getElementById("user-list-item-" + user.connectionId);
+
+    userListItem.classList.remove("flash");
+    void userListItem.offsetWidth;
+    userListItem.classList.add("flash");
+});
+
+connection.on("SetUserList", function (users) {
     users.forEach(user => {
         addUser(user);
     });
 });
 
-connection.on("UserHubDisconnected", function (user) {
-    console.log("UserHubDisconnected -->" + connection.connectionId);
-    var element = document.getElementById("username-" + user.connectionId);
+connection.on("UserDisconnected", function (user) {
+    console.log("UserDisconnected -->" + connection.connectionId);
+    var element = document.getElementById("user-list-item-" + user.connectionId);
     element.remove();
 });
 
 connection.on("ShowVotes", function (users) {
-    users.forEach(user => {
-        let span = document.getElementById("vote-" + user.connectionId);
+    console.log("Show Votes!");
 
-        span.textContent = user.currentVote;
+    var myConnectionId = document.getElementById("my-connection-id").getAttribute("value");
+
+    users.forEach(user => {
+
+        if (myConnectionId != user.connectionId) {
+            let userVote = document.getElementById("user-vote-" + user.connectionId);
+
+            userVote.textContent = user.currentVote;
+        }
     });
 });
 
+connection.on("ClearVotes", function () {
+    console.log("Clear Votes!");
+
+    let userVoteList = document.getElementsByName("user-vote");
+    userVoteList.forEach(userVote => {
+
+        userVote.classList.remove(...voteButtonClassList);
+
+        userVote.textContent = "";
+    });
+
+    let myVoteSpan = document.getElementById("my-vote");
+    myVoteSpan.textContent = "";
+});
+
 connection.start().then(function () {
+    var myConnectionId = document.getElementById("my-connection-id");
+    myConnectionId.setAttribute("value", connection.connectionId);
 }).catch(function (err) {
     return alert(err.toString());
 });
@@ -52,39 +93,41 @@ window.addEventListener("beforeunload", () => {
     connection.invoke("OnClosedTheTab", username);
 });
 
-document.getElementsByName("vote-button-success").forEach(btn =>
+document.getElementsByName("green-vote-button").forEach(btn =>
     btn.addEventListener(("click"), function () {
-        addVote(btn.textContent, "text-bg-success");
+        setVote(btn.textContent, "text-bg-success");
     })
 );
 
-document.getElementsByName("vote-button-warning").forEach(btn =>
+document.getElementsByName("yellow-vote-button").forEach(btn =>
     btn.addEventListener(("click"), function () {
-        addVote(btn.textContent, "text-bg-warning");
+        setVote(btn.textContent, "text-bg-warning");
     })
 );
 
-document.getElementsByName("vote-button-danger").forEach(btn =>
+document.getElementsByName("red-vote-button").forEach(btn =>
     btn.addEventListener(("click"), function () {
-        addVote(btn.textContent, "text-bg-danger");
+        setVote(btn.textContent, "text-bg-danger");
     })
 );
 
 document.getElementById("empty-vote-button").addEventListener("click", function () {
-    addVote("?", "text-bg-dark");
+    setVote("?", "text-bg-dark");
 });
 
-document.getElementById("btn-show-votes").addEventListener("click", function () {
+document.getElementById("show-votes-button").addEventListener("click", function () {
     connection.invoke("OnShowVotes");
 });
 
+document.getElementById("clear-votes-button").addEventListener("click", function () {
+    connection.invoke("OnClearVotes");
+});
 
-function addVote(voteValue, className) {
-    let list = ["text-bg-success", "text-bg-warning", "text-bg-danger", "text-bg-dark"];
+function setVote(voteValue, className) {
 
     let myVote = document.getElementById("my-vote");
 
-    myVote.classList.remove(...list);
+    myVote.classList.remove(...voteButtonClassList);
     myVote.classList.add(className);
     myVote.textContent = voteValue;
 
@@ -101,15 +144,17 @@ function addUser(user) {
     li.classList.add("d-flex");
     li.classList.add("justify-content-between");
     li.classList.add("align-items-center");
+    li.setAttribute("name", "user-list-item");
     li.textContent = user.username;
-    li.id = "username-" + user.connectionId;
+    li.id = "user-list-item-" + user.connectionId;
 
     document.getElementById("user-list").appendChild(li);
 
     var span = document.createElement("span");
     span.classList.add("badge");
     span.classList.add("big-badge");
-    span.id = "vote-" + user.connectionId;
+    span.setAttribute("name", "user-vote");
+    span.id = "user-vote-" + user.connectionId;
 
     if (user.hasVoted) {
         span.classList.add("text-bg-primary");

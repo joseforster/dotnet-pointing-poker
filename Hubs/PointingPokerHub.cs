@@ -6,7 +6,7 @@ public class PointingPokerHub : Hub
     private static List<UserHubModel> _userHubModelList = new List<UserHubModel>();
     private static readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
 
-    private static bool _isVotesBeingShowed = false;
+    private static bool _areVotesBeingShowed = false;
 
     public override async Task OnConnectedAsync()
     {
@@ -19,7 +19,7 @@ public class PointingPokerHub : Hub
             username = "Visitor";
         }
 
-        await this.Clients.Caller.SendAsync("UserHubConnectedList", _userHubModelList);
+        await this.Clients.Caller.SendAsync("SetUserList", _userHubModelList);
 
         var userHubModel = new UserHubModel(this.Context.ConnectionId, username);
 
@@ -35,7 +35,7 @@ public class PointingPokerHub : Hub
             _semaphoreSlim.Release();
         }
 
-        await this.Clients.Others.SendAsync("UserHubConnected", userHubModel);
+        await this.Clients.Others.SendAsync("UserConnected", userHubModel);
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
@@ -46,6 +46,80 @@ public class PointingPokerHub : Hub
     public async Task OnClosedTheTab()
     {
         await DisconnectUser();
+    }
+
+    public async Task OnUserVoted(string userVote)
+    {
+        Console.WriteLine("User voted --> " + userVote);
+
+        var userHubModel = GetCurrentUserHubModel();
+
+        if (!string.IsNullOrEmpty(userVote))
+        {
+            SetCurrentVote(userVote, userHubModel);
+        }
+
+        if (_areVotesBeingShowed)
+        {
+            await this.Clients.Others.SendAsync("UserHasVotedWithShowedVotes", userHubModel);
+        }
+        else
+        {
+            await this.Clients.Others.SendAsync("UserHasVoted", this.Context.ConnectionId);
+        }
+    }
+
+    public async Task OnShowVotes()
+    {
+        await SetAreVotesBeingShowed(true);
+
+        await this.Clients.All.SendAsync("ShowVotes", _userHubModelList);
+    }
+
+    public async Task OnClearVotes()
+    {
+        await SetAreVotesBeingShowed(false);
+
+        await _semaphoreSlim.WaitAsync();
+
+        foreach (var userHubModel in _userHubModelList)
+        {
+            userHubModel.CurrentVote = 0;
+        }
+
+        _semaphoreSlim.Release();
+
+        await this.Clients.All.SendAsync("ClearVotes");
+    }
+
+    private UserHubModel GetCurrentUserHubModel()
+    {
+        return _userHubModelList.FirstOrDefault(f => f.ConnectionId == this.Context.ConnectionId);
+    }
+
+    private async Task SetAreVotesBeingShowed(bool isVotesBeingShowed)
+    {
+        await _semaphoreSlim.WaitAsync();
+
+        _areVotesBeingShowed = isVotesBeingShowed;
+
+        _semaphoreSlim.Release();
+    }
+
+    private static void SetCurrentVote(string userVote, UserHubModel userHubModel)
+    {
+        if (userVote == "?")
+        {
+            userHubModel.IsEmptyVote = true;
+        }
+        else
+        {
+            decimal parsedVote = 0M;
+
+            decimal.TryParse(userVote, out parsedVote);
+
+            userHubModel.CurrentVote = parsedVote;
+        }
     }
 
     private async Task DisconnectUser(Exception? exception = null)
@@ -65,53 +139,10 @@ public class PointingPokerHub : Hub
 
             _semaphoreSlim.Release();
 
-            await this.Clients.Others.SendAsync("UserHubDisconnected", userHubModel);
+            await this.Clients.Others.SendAsync("UserDisconnected", userHubModel);
         }
 
         await base.OnDisconnectedAsync(exception ?? new Exception());
     }
 
-    public async Task OnUserVoted(string userVote)
-    {
-        Console.WriteLine("User voted --> " + userVote);
-
-        var userHubModel = GetCurrentUserHubModel();
-
-        decimal parsedVote;
-
-        decimal.TryParse(userVote, out parsedVote);
-
-        userHubModel.CurrentVote = parsedVote;
-
-        if (_isVotesBeingShowed)
-        {
-
-        }
-        else
-        {
-            await this.Clients.Others.SendAsync("UserHasVoted", this.Context.ConnectionId);
-        }
-
-    }
-
-    public async Task OnShowVotes()
-    {
-        await SetIsVotesBeingShowed(true);
-
-        await this.Clients.All.SendAsync("ShowVotes", _userHubModelList);
-    }
-
-    private UserHubModel GetCurrentUserHubModel()
-    {
-        return _userHubModelList.FirstOrDefault(f => f.ConnectionId == this.Context.ConnectionId);
-    }
-
-    private async Task SetIsVotesBeingShowed(bool isVotesBeingShowed)
-    {
-        await _semaphoreSlim.WaitAsync();
-
-        _isVotesBeingShowed = isVotesBeingShowed;
-
-        _semaphoreSlim.Release();
-    }
 }
