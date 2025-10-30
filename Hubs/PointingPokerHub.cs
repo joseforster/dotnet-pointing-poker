@@ -54,14 +54,12 @@ public class PointingPokerHub : Hub
 
         var userHubModel = GetCurrentUserHubModel();
 
-        if (!string.IsNullOrEmpty(userVote))
-        {
-            SetCurrentVote(userVote, userHubModel);
-        }
+        userHubModel.CurrentVote = userVote;
 
         if (_areVotesBeingShowed)
         {
             await this.Clients.Others.SendAsync("UserHasVotedWithShowedVotes", userHubModel);
+            await this.Clients.All.SendAsync("SetVoteResult", GetVoteResult());
         }
         else
         {
@@ -74,6 +72,7 @@ public class PointingPokerHub : Hub
         await SetAreVotesBeingShowed(true);
 
         await this.Clients.All.SendAsync("ShowVotes", _userHubModelList);
+        await this.Clients.All.SendAsync("SetVoteResult", GetVoteResult());
     }
 
     public async Task OnClearVotes()
@@ -82,10 +81,7 @@ public class PointingPokerHub : Hub
 
         await _semaphoreSlim.WaitAsync();
 
-        foreach (var userHubModel in _userHubModelList)
-        {
-            userHubModel.CurrentVote = 0;
-        }
+        _userHubModelList.ForEach(fe => fe.CurrentVote = string.Empty);
 
         _semaphoreSlim.Release();
 
@@ -104,22 +100,6 @@ public class PointingPokerHub : Hub
         _areVotesBeingShowed = isVotesBeingShowed;
 
         _semaphoreSlim.Release();
-    }
-
-    private static void SetCurrentVote(string userVote, UserHubModel userHubModel)
-    {
-        if (userVote == "?")
-        {
-            userHubModel.IsEmptyVote = true;
-        }
-        else
-        {
-            decimal parsedVote = 0M;
-
-            decimal.TryParse(userVote, out parsedVote);
-
-            userHubModel.CurrentVote = parsedVote;
-        }
     }
 
     private async Task DisconnectUser(Exception? exception = null)
@@ -142,7 +122,25 @@ public class PointingPokerHub : Hub
             await this.Clients.Others.SendAsync("UserDisconnected", userHubModel);
         }
 
+        await this.Clients.Others.SendAsync("SetVoteResult", GetVoteResult());
+
         await base.OnDisconnectedAsync(exception ?? new Exception());
+    }
+
+    private string GetVoteResult()
+    {
+        var usersThatVoted = _userHubModelList.Where(wh => wh.HasVoted);
+
+        var userCount = usersThatVoted.Count();
+
+        if (userCount == 0)
+        {
+            return string.Empty;
+        }
+
+        var voteSum = usersThatVoted.Sum(s => decimal.Parse(s.CurrentVote));
+
+        return (Math.Round(voteSum / userCount * 2, MidpointRounding.AwayFromZero) / 2).ToString();
     }
 
 }

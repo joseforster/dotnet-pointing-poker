@@ -12,9 +12,7 @@ public class UserHubModel
 
     public string Username { get; set; } = string.Empty;
 
-    public decimal CurrentVote { get; set; } = 0M;
+    public string CurrentVote { get; set; } = string.Empty;
 
-    public bool HasVoted => CurrentVote != 0;
-
-    public bool IsEmptyVote { get; set; }
+    public bool HasVoted => !string.IsNullOrEmpty(this.CurrentVote) && decimal.TryParse(this.CurrentVote, out decimal result);
 }

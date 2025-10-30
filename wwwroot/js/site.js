@@ -40,6 +40,11 @@ connection.on("UserHasVotedWithShowedVotes", function (user) {
     userListItem.classList.add("flash");
 });
 
+connection.on("SetVoteResult", function (averageVote) {
+    var voteResult = document.getElementById("vote-result");
+    voteResult.textContent = averageVote;
+});
+
 connection.on("SetUserList", function (users) {
     users.forEach(user => {
         addUser(user);
@@ -80,6 +85,9 @@ connection.on("ClearVotes", function () {
 
     let myVoteSpan = document.getElementById("my-vote");
     myVoteSpan.textContent = "";
+
+    var voteResult = document.getElementById("vote-result");
+    voteResult.textContent = "";
 });
 
 connection.start().then(function () {
