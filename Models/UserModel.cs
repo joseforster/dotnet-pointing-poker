@@ -1,8 +1,8 @@
 using System.Globalization;
 
-public class UserHubModel
+public class UserModel
 {
-    public UserHubModel(string connectionId, string username)
+    public UserModel(string connectionId, string username)
     {
         ConnectionId = connectionId;
         Username = username;

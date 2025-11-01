@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 
 public class PointingPokerHub : Hub
 {
-    private static List<UserHubModel> _userHubModelList = new List<UserHubModel>();
+    private static List<UserModel> _userModelList = new List<UserModel>();
     private static readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
 
     private static bool _areVotesBeingShowed = false;
@@ -19,23 +19,28 @@ public class PointingPokerHub : Hub
             username = "Visitor";
         }
 
-        await this.Clients.Caller.SendAsync("SetUserList", _userHubModelList);
+        await this.Clients.Caller.SendAsync("SetUserList", _userModelList);
 
-        var userHubModel = new UserHubModel(this.Context.ConnectionId, username);
+        var userHubModel = new UserModel(this.Context.ConnectionId, username);
 
-        if (!_userHubModelList.Contains(userHubModel))
+        if (!_userModelList.Contains(userHubModel))
         {
             await _semaphoreSlim.WaitAsync();
 
-            if (!_userHubModelList.Contains(userHubModel))
+            if (!_userModelList.Contains(userHubModel))
             {
-                _userHubModelList.Add(userHubModel);
+                _userModelList.Add(userHubModel);
             }
 
             _semaphoreSlim.Release();
         }
 
         await this.Clients.Others.SendAsync("UserConnected", userHubModel);
+
+        if (_areVotesBeingShowed)
+        {
+            await this.Clients.Caller.SendAsync("SetVoteResult", GetVoteModel());
+        }
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
@@ -52,14 +57,14 @@ public class PointingPokerHub : Hub
     {
         Console.WriteLine("User voted --> " + userVote);
 
-        var userHubModel = GetCurrentUserHubModel();
+        var userModel = GetCurrentUserModel();
 
-        userHubModel.CurrentVote = userVote;
+        userModel.CurrentVote = userVote;
 
         if (_areVotesBeingShowed)
         {
-            await this.Clients.Others.SendAsync("UserHasVotedWithShowedVotes", userHubModel);
-            await this.Clients.All.SendAsync("SetVoteResult", GetVoteResult());
+            await this.Clients.Others.SendAsync("UserHasVotedWithShowedVotes", userModel);
+            await this.Clients.All.SendAsync("SetVoteResult", GetVoteModel());
         }
         else
         {
@@ -71,8 +76,8 @@ public class PointingPokerHub : Hub
     {
         await SetAreVotesBeingShowed(true);
 
-        await this.Clients.All.SendAsync("ShowVotes", _userHubModelList);
-        await this.Clients.All.SendAsync("SetVoteResult", GetVoteResult());
+        await this.Clients.All.SendAsync("ShowVotes", _userModelList);
+        await this.Clients.All.SendAsync("SetVoteResult", GetVoteModel());
     }
 
     public async Task OnClearVotes()
@@ -81,16 +86,16 @@ public class PointingPokerHub : Hub
 
         await _semaphoreSlim.WaitAsync();
 
-        _userHubModelList.ForEach(fe => fe.CurrentVote = string.Empty);
+        _userModelList.ForEach(fe => fe.CurrentVote = string.Empty);
 
         _semaphoreSlim.Release();
 
         await this.Clients.All.SendAsync("ClearVotes");
     }
 
-    private UserHubModel GetCurrentUserHubModel()
+    private UserModel GetCurrentUserModel()
     {
-        return _userHubModelList.FirstOrDefault(f => f.ConnectionId == this.Context.ConnectionId);
+        return _userModelList.FirstOrDefault(f => f.ConnectionId == this.Context.ConnectionId);
     }
 
     private async Task SetAreVotesBeingShowed(bool isVotesBeingShowed)
@@ -104,43 +109,33 @@ public class PointingPokerHub : Hub
 
     private async Task DisconnectUser(Exception? exception = null)
     {
-        var userHubModel = GetCurrentUserHubModel();
+        var userModel = GetCurrentUserModel();
 
-        if (userHubModel != null)
+        if (userModel != null)
         {
             await _semaphoreSlim.WaitAsync();
 
-            userHubModel = GetCurrentUserHubModel();
+            userModel = GetCurrentUserModel();
 
-            if (userHubModel != null)
+            if (userModel != null)
             {
-                _userHubModelList.Remove(userHubModel);
+                _userModelList.Remove(userModel);
             }
 
             _semaphoreSlim.Release();
 
-            await this.Clients.Others.SendAsync("UserDisconnected", userHubModel);
+            await this.Clients.Others.SendAsync("UserDisconnected", userModel);
         }
 
-        await this.Clients.Others.SendAsync("SetVoteResult", GetVoteResult());
+        await this.Clients.Others.SendAsync("SetVoteResult", GetVoteModel());
 
         await base.OnDisconnectedAsync(exception ?? new Exception());
     }
 
-    private string GetVoteResult()
+    private VoteModel GetVoteModel()
     {
-        var usersThatVoted = _userHubModelList.Where(wh => wh.HasVoted);
+        var voteModel = new VoteModel(_userModelList);
 
-        var userCount = usersThatVoted.Count();
-
-        if (userCount == 0)
-        {
-            return string.Empty;
-        }
-
-        var voteSum = usersThatVoted.Sum(s => decimal.Parse(s.CurrentVote));
-
-        return (Math.Round(voteSum / userCount * 2, MidpointRounding.AwayFromZero) / 2).ToString();
+        return voteModel;
     }
-
 }

@@ -55,3 +55,12 @@ body {
     /* fade back to normal */
   }
 }
+
+#vote-result {
+  font-size: 2rem;
+  /* Make the text bigger */
+  font-weight: bold;
+  /* Make it bold */
+  text-align: center;
+  /* Center the text */
+}

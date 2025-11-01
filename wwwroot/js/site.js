@@ -1,6 +1,13 @@
 ﻿"use strict";
 
-let voteButtonClassList = ["text-bg-success", "text-bg-warning", "text-bg-danger", "text-bg-dark", "text-bg-primary"];
+var classList = ["text-bg-success", "text-bg-warning", "text-bg-danger", "text-bg-dark", "text-bg-primary", "text-bg-light"];
+
+var mapVoteScaleByClass = new Map();
+mapVoteScaleByClass.set(0, "text-bg-light");
+mapVoteScaleByClass.set(1, "text-bg-success");
+mapVoteScaleByClass.set(2, "text-bg-warning");
+mapVoteScaleByClass.set(3, "text-bg-danger");
+
 
 var username = document.getElementById("my-username").textContent;
 
@@ -13,7 +20,7 @@ connection.on("UserConnected", function (user) {
 connection.on("UserHasVoted", function (connectionId) {
 
     console.log("user votou --> " + connectionId);
-    var userVote = document.getElementById("user-vote-" + connectionId);
+    let userVote = document.getElementById("user-vote-" + connectionId);
 
     userVote.classList.add("text-bg-primary");
     userVote.textContent = "OK";
@@ -28,7 +35,7 @@ connection.on("UserHasVoted", function (connectionId) {
 connection.on("UserHasVotedWithShowedVotes", function (user) {
     console.log("Votos abertos: " + user.username + " -- > " + user.currentVote);
 
-    var userVote = document.getElementById("user-vote-" + user.connectionId);
+    let userVote = document.getElementById("user-vote-" + user.connectionId);
 
     userVote.classList.add("text-bg-primary");
     userVote.textContent = user.currentVote;
@@ -40,9 +47,20 @@ connection.on("UserHasVotedWithShowedVotes", function (user) {
     userListItem.classList.add("flash");
 });
 
-connection.on("SetVoteResult", function (averageVote) {
-    var voteResult = document.getElementById("vote-result");
-    voteResult.textContent = averageVote;
+connection.on("SetVoteResult", function (voteModel) {
+    let voteResult = document.getElementById("vote-result");
+    voteResult.textContent = voteModel.voteResult;
+
+    let voteCard = document.getElementById("vote-card");
+
+    voteCard.classList.remove(...classList);
+
+    var newClass = mapVoteScaleByClass.get(voteModel.voteScale);
+    voteCard.classList.add(newClass);
+
+    voteCard.classList.remove("flash");
+    void voteCard.offsetWidth;
+    voteCard.classList.add("flash");
 });
 
 connection.on("SetUserList", function (users) {
@@ -53,14 +71,14 @@ connection.on("SetUserList", function (users) {
 
 connection.on("UserDisconnected", function (user) {
     console.log("UserDisconnected -->" + connection.connectionId);
-    var element = document.getElementById("user-list-item-" + user.connectionId);
+    let element = document.getElementById("user-list-item-" + user.connectionId);
     element.remove();
 });
 
 connection.on("ShowVotes", function (users) {
     console.log("Show Votes!");
 
-    var myConnectionId = document.getElementById("my-connection-id").getAttribute("value");
+    let myConnectionId = document.getElementById("my-connection-id").getAttribute("value");
 
     users.forEach(user => {
 
@@ -78,7 +96,7 @@ connection.on("ClearVotes", function () {
     let userVoteList = document.getElementsByName("user-vote");
     userVoteList.forEach(userVote => {
 
-        userVote.classList.remove(...voteButtonClassList);
+        userVote.classList.remove(...classList);
 
         userVote.textContent = "";
     });
@@ -86,12 +104,16 @@ connection.on("ClearVotes", function () {
     let myVoteSpan = document.getElementById("my-vote");
     myVoteSpan.textContent = "";
 
-    var voteResult = document.getElementById("vote-result");
+    let voteResult = document.getElementById("vote-result");
     voteResult.textContent = "";
+
+    let voteCard = document.getElementById("vote-card");
+    voteCard.classList.remove(...classList);
+    voteCard.classList.add("text-bg-light");
 });
 
 connection.start().then(function () {
-    var myConnectionId = document.getElementById("my-connection-id");
+    let myConnectionId = document.getElementById("my-connection-id");
     myConnectionId.setAttribute("value", connection.connectionId);
 }).catch(function (err) {
     return alert(err.toString());
@@ -135,7 +157,7 @@ function setVote(voteValue, className) {
 
     let myVote = document.getElementById("my-vote");
 
-    myVote.classList.remove(...voteButtonClassList);
+    myVote.classList.remove(...classList);
     myVote.classList.add(className);
     myVote.textContent = voteValue;
 
@@ -146,7 +168,7 @@ function addUser(user) {
 
     console.log("Alguém novo conectou: " + user.username);
 
-    var li = document.createElement("li");
+    let li = document.createElement("li");
 
     li.classList.add("list-group-item");
     li.classList.add("d-flex");
@@ -158,7 +180,7 @@ function addUser(user) {
 
     document.getElementById("user-list").appendChild(li);
 
-    var span = document.createElement("span");
+    let span = document.createElement("span");
     span.classList.add("badge");
     span.classList.add("big-badge");
     span.setAttribute("name", "user-vote");
