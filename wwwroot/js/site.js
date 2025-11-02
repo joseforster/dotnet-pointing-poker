@@ -9,7 +9,7 @@ mapVoteScaleByClass.set(2, "text-bg-warning");
 mapVoteScaleByClass.set(3, "text-bg-danger");
 
 
-var username = document.getElementById("my-username").textContent;
+var username = document.getElementById("my-username") != null ? document.getElementById("my-username").textContent : "";
 
 var connection = new signalR.HubConnectionBuilder().withUrl("/pointingpokerhub?username=" + username).build();
 
@@ -63,9 +63,9 @@ connection.on("SetVoteResult", function (voteModel) {
     voteCard.classList.add("flash");
 });
 
-connection.on("SetUserList", function (users) {
+connection.on("SetUserList", function (users, areVotesBeingShowed) {
     users.forEach(user => {
-        addUser(user);
+        addUser(user, areVotesBeingShowed);
     });
 });
 
@@ -164,7 +164,7 @@ function setVote(voteValue, className) {
     connection.invoke("OnUserVoted", voteValue);
 }
 
-function addUser(user) {
+function addUser(user, areVotesBeingShowed) {
 
     console.log("Alguém novo conectou: " + user.username);
 
@@ -187,8 +187,12 @@ function addUser(user) {
     span.id = "user-vote-" + user.connectionId;
 
     if (user.hasVoted) {
-        span.classList.add("text-bg-primary");
-        span.textContent = "OK";
+        if (areVotesBeingShowed) {
+            span.textContent = user.currentVote;
+        } else {
+            span.classList.add("text-bg-primary");
+            span.textContent = "OK";
+        }
     }
 
     li.appendChild(span);

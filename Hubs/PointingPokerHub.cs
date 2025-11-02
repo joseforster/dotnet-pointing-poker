@@ -19,7 +19,7 @@ public class PointingPokerHub : Hub
             username = "Visitor";
         }
 
-        await this.Clients.Caller.SendAsync("SetUserList", _userModelList);
+        await this.Clients.Caller.SendAsync("SetUserList", _userModelList, _areVotesBeingShowed);
 
         var userHubModel = new UserModel(this.Context.ConnectionId, username);
 

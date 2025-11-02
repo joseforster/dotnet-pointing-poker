@@ -1,5 +1,3 @@
-using System.Globalization;
-
 public class UserModel
 {
     public UserModel(string connectionId, string username)
@@ -14,5 +12,7 @@ public class UserModel
 
     public string CurrentVote { get; set; } = string.Empty;
 
-    public bool HasVoted => !string.IsNullOrEmpty(this.CurrentVote) && decimal.TryParse(this.CurrentVote, out decimal result);
+    public EnumVoteScale VoteScale { get; set; }
+
+    public bool HasVoted => !string.IsNullOrEmpty(this.CurrentVote);
 }
