@@ -3,5 +3,6 @@ public enum EnumVoteScale
     Empty,
     Low,
     Medium,
-    High
+    High,
+    Undecided,
 }

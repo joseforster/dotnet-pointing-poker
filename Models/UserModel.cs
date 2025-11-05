@@ -10,9 +10,17 @@ public class UserModel
 
     public string Username { get; set; } = string.Empty;
 
-    public string CurrentVote { get; set; } = string.Empty;
+    public string CurrentVote { get; private set; } = string.Empty;
 
     public EnumVoteScale VoteScale { get; set; }
 
     public bool HasVoted => !string.IsNullOrEmpty(this.CurrentVote);
+
+    private VoteScaleHelper _voteScaleHelper = new VoteScaleHelper();
+
+    public void SetCurrentVote(string vote)
+    {
+        CurrentVote = vote;
+        this.VoteScale = _voteScaleHelper.GetEnumVoteScale(vote);
+    }
 }

@@ -35,7 +35,7 @@ public class PointingPokerHub : Hub
             _semaphoreSlim.Release();
         }
 
-        await this.Clients.Others.SendAsync("UserConnected", userHubModel);
+        await this.Clients.Others.SendAsync("NewUserHasConnected", userHubModel);
 
         if (_areVotesBeingShowed)
         {
@@ -59,7 +59,7 @@ public class PointingPokerHub : Hub
 
         var userModel = GetCurrentUserModel();
 
-        userModel.CurrentVote = userVote;
+        userModel.SetCurrentVote(userVote);
 
         if (_areVotesBeingShowed)
         {
@@ -86,7 +86,7 @@ public class PointingPokerHub : Hub
 
         await _semaphoreSlim.WaitAsync();
 
-        _userModelList.ForEach(fe => fe.CurrentVote = string.Empty);
+        _userModelList.ForEach(fe => fe.SetCurrentVote(string.Empty));
 
         _semaphoreSlim.Release();
 

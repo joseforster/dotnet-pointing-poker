@@ -7,13 +7,14 @@ mapVoteScaleByClass.set(0, "text-bg-light");
 mapVoteScaleByClass.set(1, "text-bg-success");
 mapVoteScaleByClass.set(2, "text-bg-warning");
 mapVoteScaleByClass.set(3, "text-bg-danger");
+mapVoteScaleByClass.set(4, "text-bg-dark");
 
 
 var username = document.getElementById("my-username") != null ? document.getElementById("my-username").textContent : "";
 
 var connection = new signalR.HubConnectionBuilder().withUrl("/pointingpokerhub?username=" + username).build();
 
-connection.on("UserConnected", function (user) {
+connection.on("NewUserHasConnected", function (user) {
     addUser(user);
 });
 
@@ -37,7 +38,10 @@ connection.on("UserHasVotedWithShowedVotes", function (user) {
 
     let userVote = document.getElementById("user-vote-" + user.connectionId);
 
-    userVote.classList.add("text-bg-primary");
+    userVote.classList.remove(...classList);
+
+    var newClass = mapVoteScaleByClass.get(user.voteScale);
+    userVote.classList.add(newClass);
     userVote.textContent = user.currentVote;
 
     let userListItem = document.getElementById("user-list-item-" + user.connectionId);
@@ -86,6 +90,8 @@ connection.on("ShowVotes", function (users) {
             let userVote = document.getElementById("user-vote-" + user.connectionId);
 
             userVote.textContent = user.currentVote;
+            userVote.classList.remove(...classList);
+            userVote.classList.add(mapVoteScaleByClass.get(user.voteScale));
         }
     });
 });
@@ -105,7 +111,7 @@ connection.on("ClearVotes", function () {
     myVoteSpan.textContent = "";
 
     let voteResult = document.getElementById("vote-result");
-    voteResult.textContent = "";
+    voteResult.textContent = "Waiting votes to be showed...";
 
     let voteCard = document.getElementById("vote-card");
     voteCard.classList.remove(...classList);
@@ -189,6 +195,7 @@ function addUser(user, areVotesBeingShowed) {
     if (user.hasVoted) {
         if (areVotesBeingShowed) {
             span.textContent = user.currentVote;
+            span.classList.add(mapVoteScaleByClass.get(user.voteScale));
         } else {
             span.classList.add("text-bg-primary");
             span.textContent = "OK";
