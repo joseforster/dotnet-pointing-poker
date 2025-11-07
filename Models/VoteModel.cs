@@ -23,7 +23,7 @@ public class VoteModel
         {
             var voteSum = usersThatVoted.Sum(s => decimal.Parse(s.CurrentVote));
 
-            VoteResult = (Math.Round(voteSum / userCount * 2, MidpointRounding.AwayFromZero) / 2).ToString();
+            VoteResult = Math.Round(voteSum / userCount, 1).ToString();
         }
         else
         {

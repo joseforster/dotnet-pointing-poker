@@ -1,6 +1,6 @@
 ﻿"use strict";
 
-var classList = ["text-bg-success", "text-bg-warning", "text-bg-danger", "text-bg-dark", "text-bg-primary", "text-bg-light"];
+var classList = ["text-bg-success", "text-bg-warning", "text-bg-danger", "text-bg-dark", "text-bg-primary", "text-bg-light", "text-secondary"];
 
 var mapVoteScaleByClass = new Map();
 mapVoteScaleByClass.set(0, "text-bg-light");
@@ -53,6 +53,11 @@ connection.on("UserHasVotedWithShowedVotes", function (user) {
 
 connection.on("SetVoteResult", function (voteModel) {
     let voteResult = document.getElementById("vote-result");
+
+    if (voteModel.voteResult == "") {
+        return;
+    }
+
     voteResult.textContent = voteModel.voteResult;
 
     let voteCard = document.getElementById("vote-card");
@@ -104,18 +109,20 @@ connection.on("ClearVotes", function () {
 
         userVote.classList.remove(...classList);
 
-        userVote.textContent = "";
     });
 
     let myVoteSpan = document.getElementById("my-vote");
-    myVoteSpan.textContent = "";
+    myVoteSpan.textContent = "--";
+    myVoteSpan.classList.remove(...classList);
+    myVoteSpan.classList.add("text-secondary");
 
     let voteResult = document.getElementById("vote-result");
-    voteResult.textContent = "Waiting votes to be showed...";
+    voteResult.textContent = "waiting";
 
     let voteCard = document.getElementById("vote-card");
     voteCard.classList.remove(...classList);
     voteCard.classList.add("text-bg-light");
+    voteCard.classList.add("text-secondary");
 });
 
 connection.start().then(function () {
@@ -165,6 +172,7 @@ function setVote(voteValue, className) {
 
     myVote.classList.remove(...classList);
     myVote.classList.add(className);
+
     myVote.textContent = voteValue;
 
     connection.invoke("OnUserVoted", voteValue);
