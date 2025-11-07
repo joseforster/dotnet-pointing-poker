@@ -15,7 +15,15 @@ public class VoteModel
 
     private void SetVoteResult(IEnumerable<UserModel> userModels)
     {
-        var usersThatVoted = userModels.Where(wh => wh.HasVoted && decimal.TryParse(wh.CurrentVote, out var result));
+        var usersThatVoted = userModels.Where(wh => wh.HasVoted);
+
+        if (usersThatVoted.Any() && usersThatVoted.All(a => !decimal.TryParse(a.CurrentVote, out var result)))
+        {
+            VoteResult = "?";
+            return;
+        }
+
+        usersThatVoted = usersThatVoted.Where(wh => decimal.TryParse(wh.CurrentVote, out var result));
 
         var userCount = usersThatVoted.Count();
 
