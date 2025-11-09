@@ -17,7 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\PointingPoker.Web\PointingPoker.csproj" />
+      <ProjectReference Include="..\PointingPoker.Web\PointingPoker.csproj" />
     </ItemGroup>
 
 </Project>
