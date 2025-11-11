@@ -8,27 +8,17 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 public class LoginModel : PageModel
 {
-    private readonly IConfiguration _configuration;
-
-    public string Erro { get; private set; }
-
-    public LoginModel(IConfiguration configuration)
+    public async Task<IActionResult> OnPost([FromForm] string username, string session)
     {
-        _configuration = configuration;
-    }
-
-    public async Task<IActionResult> OnPost([FromForm] string username, string password)
-    {
-        if (password != _configuration["Password"])
+        if (string.IsNullOrEmpty(session))
         {
-            Erro = "Não é possível que tu não consiga copiar e colar um senha.";
-
-            return Page();
+            session = new Random().Next(1,1000000).ToString();
         }
 
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Name, username),
+            new Claim(ClaimTypes.UserData,  session),
         };
 
         var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
