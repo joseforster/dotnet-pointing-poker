@@ -7,6 +7,11 @@
 <div class="row">
     <div class="col">
         <div class="row m-2">
+            <div class="d-flex gap-2 m-2">
+                <span type="button" name="red-vote-button" class="text-bg-danger w-100 p-3 ">@Model.SessionId</span>
+            </div>
+        </div>
+        <div class="row m-2">
             <div id="vote-card" class="card text-bg-light text-secondary">
                 <div class="card-body">
                     <p id="vote-result" class="card-text p-5">waiting</p>
@@ -17,8 +22,7 @@
             <button type="button" id="show-votes-button" class="btn btn-outline-primary p-3 w-100">Show Votes</button>
         </div>
         <div class="row m-2">
-            <button type="button" id="clear-votes-button" class="btn btn-outline-secondary p-3 w-100">Clear
-                Votes</button>
+            <button type="button" id="clear-votes-button" class="btn btn-outline-secondary p-3 w-100">Clear Votes</button>
         </div>
         <div class="d-flex gap-2 m-2">
             <button type="button" name="green-vote-button" class="btn btn-success w-100 p-3">0.5</button>
@@ -65,3 +69,4 @@
     </div>
 </div>
 <script src="~/js/signalr/dist/browser/signalr.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>

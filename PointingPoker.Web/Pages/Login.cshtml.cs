@@ -5,20 +5,19 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-
 public class LoginModel : PageModel
 {
     public async Task<IActionResult> OnPost([FromForm] string username, string session)
     {
         if (string.IsNullOrEmpty(session))
         {
-            session = new Random().Next(1,1000000).ToString();
+            session = new Random().Next(1, 1000000).ToString();
         }
 
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Name, username),
-            new Claim(ClaimTypes.UserData,  session),
+            new Claim("Session", session),
         };
 
         var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

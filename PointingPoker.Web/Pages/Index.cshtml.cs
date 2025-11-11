@@ -15,6 +15,6 @@ public class IndexModel : PageModel
     public void OnGet()
     {
         this.Username = User.Identity.Name;
-        this.SessionId = User.Claims.First(f => f.Type == ClaimTypes.UserData.ToString()).Value;
+        this.SessionId = User.FindFirstValue("Session")!;
     }
 }

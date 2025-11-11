@@ -17,13 +17,13 @@ public class VoteModel
     {
         var usersThatVoted = userModels.Where(wh => wh.HasVoted);
 
-        if (usersThatVoted.Any() && usersThatVoted.All(a => !decimal.TryParse(a.CurrentVote, out var result)))
+        if (usersThatVoted.Any() && usersThatVoted.All(a => !a.IsVoteAnNumber))
         {
             VoteResult = "?";
             return;
         }
 
-        usersThatVoted = usersThatVoted.Where(wh => decimal.TryParse(wh.CurrentVote, out var result));
+        usersThatVoted = usersThatVoted.Where(wh => wh.IsVoteAnNumber);
 
         var userCount = usersThatVoted.Count();
 

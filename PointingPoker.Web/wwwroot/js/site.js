@@ -9,10 +9,7 @@ mapVoteScaleByClass.set(2, "text-bg-warning");
 mapVoteScaleByClass.set(3, "text-bg-danger");
 mapVoteScaleByClass.set(4, "text-bg-dark");
 
-
-var username = document.getElementById("my-username") != null ? document.getElementById("my-username").textContent : "";
-
-var connection = new signalR.HubConnectionBuilder().withUrl("/pointingpokerhub?username=" + username).build();
+var connection = new signalR.HubConnectionBuilder().withUrl("/pointingpokerhub").build();
 
 connection.on("NewUserHasConnected", function (user) {
     addUser(user);
@@ -20,7 +17,6 @@ connection.on("NewUserHasConnected", function (user) {
 
 connection.on("UserHasVoted", function (connectionId) {
 
-    console.log("user votou --> " + connectionId);
     let userVote = document.getElementById("user-vote-" + connectionId);
 
     userVote.classList.add("text-bg-primary");
@@ -34,7 +30,6 @@ connection.on("UserHasVoted", function (connectionId) {
 })
 
 connection.on("UserHasVotedWithShowedVotes", function (user) {
-    console.log("Votos abertos: " + user.username + " -- > " + user.currentVote);
 
     let userVote = document.getElementById("user-vote-" + user.connectionId);
 
@@ -79,14 +74,11 @@ connection.on("SetUserList", function (users, areVotesBeingShowed) {
 });
 
 connection.on("UserDisconnected", function (user) {
-    console.log("UserDisconnected -->" + connection.connectionId);
     let element = document.getElementById("user-list-item-" + user.connectionId);
     element.remove();
 });
 
 connection.on("ShowVotes", function (users) {
-    console.log("Show Votes!");
-
     let myConnectionId = document.getElementById("my-connection-id").getAttribute("value");
 
     users.forEach(user => {
@@ -102,7 +94,6 @@ connection.on("ShowVotes", function (users) {
 });
 
 connection.on("ClearVotes", function () {
-    console.log("Clear Votes!");
 
     let userVoteList = document.getElementsByName("user-vote");
     userVoteList.forEach(userVote => {
@@ -133,7 +124,7 @@ connection.start().then(function () {
 });
 
 window.addEventListener("beforeunload", () => {
-    connection.invoke("OnClosedTheTab", username);
+    connection.invoke("OnClosedTheTab");
 });
 
 document.getElementsByName("green-vote-button").forEach(btn =>
@@ -179,8 +170,6 @@ function setVote(voteValue, className) {
 }
 
 function addUser(user, areVotesBeingShowed) {
-
-    console.log("Alguém novo conectou: " + user.username);
 
     let li = document.createElement("li");
 
