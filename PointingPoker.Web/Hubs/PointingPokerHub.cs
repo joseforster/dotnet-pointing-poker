@@ -1,24 +1,42 @@
-using System.Diagnostics;
-using System.Security.Claims;
 using Microsoft.AspNetCore.SignalR;
+using PointingPoker.Enums;
 
 public class PointingPokerHub : Hub
 {
-    private static Dictionary<string, List<UserModel>> _userModelListBySession = new Dictionary<string, List<UserModel>>();
-    private static readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
+    private static Dictionary<string, List<UserModel>> _userModelListBySession = new ();
 
-    private static Dictionary<string, bool> _areVotesBeingShowedBySession = new Dictionary<string, bool>();
+    private static readonly SemaphoreSlim _semaphoreSlim = new (1, 1);
+
+    private static Dictionary<string, bool> _areVotesBeingShowedBySession = new ();
 
     public override async Task OnConnectedAsync()
     {
         await base.OnConnectedAsync();
 
         var username = Context.GetHttpContext().User.Identity.Name!;
-        var sessionId = Context.GetHttpContext().User.Claims.First(f => f.Type == "Session").Value;
-        
+        var sessionId = GetSessionId();
+
         await Groups.AddToGroupAsync(Context.ConnectionId, sessionId);
 
-        await Clients.Caller.SendAsync("SetUserList", _userModelListBySession[sessionId], _areVotesBeingShowedBySession);
+        if (!_userModelListBySession.ContainsKey(sessionId))
+        {
+            await _semaphoreSlim.WaitAsync();
+
+            if (!_userModelListBySession.ContainsKey(sessionId))
+            {
+                _userModelListBySession[sessionId] = new List<UserModel>();
+            }
+            
+            _semaphoreSlim.Release();
+        }
+        
+        if (!_areVotesBeingShowedBySession.ContainsKey(sessionId))
+        {
+            await SetAreVotesBeingShowed(false, sessionId);
+        }
+
+        await Clients.Caller.SendAsync("SetUserList", _userModelListBySession[sessionId],
+            _areVotesBeingShowedBySession[sessionId]);
 
         var userHubModel = new UserModel(Context.ConnectionId, username, sessionId);
 
@@ -33,9 +51,9 @@ public class PointingPokerHub : Hub
 
             _semaphoreSlim.Release();
         }
-        
-        await Clients.GroupExcept(sessionId, this.Context.ConnectionId).SendAsync("NewUserHasConnected", userHubModel);
 
+        await Clients.GroupExcept(sessionId, this.Context.ConnectionId).SendAsync("NewUserHasConnected", userHubModel);
+        
         if (_areVotesBeingShowedBySession[sessionId])
         {
             await Clients.Caller.SendAsync("SetVoteResult", GetVoteModel(sessionId));
@@ -60,21 +78,23 @@ public class PointingPokerHub : Hub
 
         if (_areVotesBeingShowedBySession[userModel.SessionId])
         {
-            await Clients.GroupExcept(userModel.SessionId, this.Context.ConnectionId).SendAsync("UserHasVotedWithShowedVotes", userModel);
+            await Clients.GroupExcept(userModel.SessionId, this.Context.ConnectionId)
+                .SendAsync("UserHasVotedWithShowedVotes", userModel);
             await Clients.Group(userModel.SessionId).SendAsync("SetVoteResult", GetVoteModel(userModel.SessionId));
         }
         else
         {
-            await Clients.GroupExcept(userModel.SessionId, this.Context.ConnectionId).SendAsync("UserHasVoted", Context.ConnectionId);
+            await Clients.GroupExcept(userModel.SessionId, this.Context.ConnectionId)
+                .SendAsync("UserHasVoted", Context.ConnectionId);
         }
     }
 
     public async Task OnShowVotes()
     {
         string sessionId = GetSessionId();
-        
+
         await SetAreVotesBeingShowed(true, sessionId);
-        
+
         await Clients.Group(sessionId).SendAsync("ShowVotes", _userModelListBySession[sessionId]);
         await Clients.Group(sessionId).SendAsync("SetVoteResult", GetVoteModel(sessionId));
     }
@@ -82,7 +102,7 @@ public class PointingPokerHub : Hub
     public async Task OnClearVotes()
     {
         string sessionId = GetSessionId();
-        
+
         await SetAreVotesBeingShowed(false, sessionId);
 
         await _semaphoreSlim.WaitAsync();
@@ -96,7 +116,8 @@ public class PointingPokerHub : Hub
 
     private UserModel GetCurrentUserModel()
     {
-        return _userModelListBySession.SelectMany(s => s.Value).FirstOrDefault(f => f.ConnectionId == Context.ConnectionId);
+        return _userModelListBySession.SelectMany(s => s.Value)
+            .FirstOrDefault(f => f.ConnectionId == Context.ConnectionId);
     }
 
     private async Task SetAreVotesBeingShowed(bool isVotesBeingShowed, string sessionId)
@@ -120,14 +141,25 @@ public class PointingPokerHub : Hub
 
             if (userModel != null)
             {
-                _userModelListBySession[userModel.SessionId].Remove(userModel);
+                if (_userModelListBySession[userModel.SessionId].Remove(userModel) &&
+                    _userModelListBySession[userModel.SessionId].Count == 0)
+                {
+                    if (_userModelListBySession.Remove(userModel.SessionId))
+                    {
+                        _areVotesBeingShowedBySession.Remove(userModel.SessionId);
+                    }
+                }
+                
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, userModel.SessionId);
+
+                await Clients.GroupExcept(userModel.SessionId, this.Context.ConnectionId)
+                    .SendAsync("UserDisconnected", userModel);
+
+                await Clients.GroupExcept(userModel.SessionId, this.Context.ConnectionId)
+                    .SendAsync("SetVoteResult", GetVoteModel(userModel.SessionId));
             }
-
-            _semaphoreSlim.Release();
-
-            await Clients.GroupExcept(userModel.SessionId, this.Context.ConnectionId).SendAsync("UserDisconnected", userModel);
             
-            await Clients.GroupExcept(userModel.SessionId, this.Context.ConnectionId).SendAsync("SetVoteResult", GetVoteModel(userModel.SessionId));
+            _semaphoreSlim.Release();
         }
 
         await base.OnDisconnectedAsync(exception ?? new Exception());
@@ -142,6 +174,6 @@ public class PointingPokerHub : Hub
 
     private string GetSessionId()
     {
-        return Context.GetHttpContext().User.Claims.First(f => f.Type == "Session").Value;
+        return Context.GetHttpContext().User.Claims.First(f => f.Type == nameof(EnumCustomClaimType.Session)).Value;
     }
 }
