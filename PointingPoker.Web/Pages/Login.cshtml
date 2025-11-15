@@ -14,7 +14,7 @@
                            placeholder="your username">
                 </div>
                 <div class="col">
-                    <button type="submit" name="isCreatingSession" value="true" class="btn btn-success w-100">
+                    <button type="submit" asp-page-handler="CreateSession" class="btn btn-success w-100">
                         Create Session
                     </button>
                 </div>
@@ -27,7 +27,7 @@
                            placeholder="session number"/>
                 </div>
                 <div class="col">
-                    <button type="submit" name="isCreatingSession" value="false" class="btn btn-outline-success w-100">
+                    <button type="submit" asp-page-handler="JoinSession" class="btn btn-outline-success w-100">
                         Join Session
                     </button>
                 </div>

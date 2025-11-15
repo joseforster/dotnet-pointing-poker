@@ -1,5 +1,7 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.SignalR;
 using PointingPoker.Enums;
@@ -17,5 +19,12 @@ public class IndexModel : PageModel
     {
         this.Username = User.Identity.Name;
         this.SessionId = User.FindFirstValue(nameof(EnumCustomClaimType.Session));
+    }
+    
+    public async Task<IActionResult> OnPostExitSession()
+    {
+        await HttpContext.SignOutAsync();
+        
+        return RedirectToPage("/Login");
     }
 }

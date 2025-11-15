@@ -124,7 +124,7 @@ connection.start().then(function () {
 });
 
 window.addEventListener("beforeunload", () => {
-    connection.invoke("OnClosedTheTab");
+    connection.stop();
 });
 
 document.getElementsByName("green-vote-button").forEach(btn =>
@@ -200,4 +200,8 @@ function addUser(user, areVotesBeingShowed) {
     }
 
     li.appendChild(span);
+}
+
+function exitSession(){
+    connection.stop();
 }

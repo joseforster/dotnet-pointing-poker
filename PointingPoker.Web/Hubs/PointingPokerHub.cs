@@ -62,12 +62,38 @@ public class PointingPokerHub : Hub
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        await DisconnectUser(exception);
-    }
+        var userModel = GetCurrentUserModel();
 
-    public async Task OnClosedTheTab()
-    {
-        await DisconnectUser();
+        if (userModel != null)
+        {
+            await _semaphoreSlim.WaitAsync();
+
+            userModel = GetCurrentUserModel();
+
+            if (userModel != null)
+            {
+                if (_userModelListBySession[userModel.SessionId].Remove(userModel) &&
+                    _userModelListBySession[userModel.SessionId].Count == 0)
+                {
+                    if (_userModelListBySession.Remove(userModel.SessionId))
+                    {
+                        _areVotesBeingShowedBySession.Remove(userModel.SessionId);
+                    }
+                }
+                
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, userModel.SessionId);
+
+                await Clients.GroupExcept(userModel.SessionId, this.Context.ConnectionId)
+                    .SendAsync("UserDisconnected", userModel);
+
+                await Clients.GroupExcept(userModel.SessionId, this.Context.ConnectionId)
+                    .SendAsync("SetVoteResult", GetVoteModel(userModel.SessionId));
+            }
+            
+            _semaphoreSlim.Release();
+        }
+        
+        await base.OnDisconnectedAsync(exception ?? new Exception());
     }
 
     public async Task OnUserVoted(string userVote)
@@ -113,13 +139,29 @@ public class PointingPokerHub : Hub
 
         await Clients.Group(sessionId).SendAsync("ClearVotes");
     }
-
-    private UserModel GetCurrentUserModel()
+    
+    public static bool DoesSessionExist(string sessionId)
     {
-        return _userModelListBySession.SelectMany(s => s.Value)
-            .FirstOrDefault(f => f.ConnectionId == Context.ConnectionId);
+        return _userModelListBySession.ContainsKey(sessionId);
     }
 
+    private VoteModel GetVoteModel(string sessionId)
+    {
+        if (_userModelListBySession.ContainsKey(sessionId))
+        {
+            return new VoteModel(_userModelListBySession[sessionId]);
+        }
+        else
+        {
+            return  new VoteModel(Enumerable.Empty<UserModel>());
+        }
+    }
+
+    private string GetSessionId()
+    {
+        return Context.GetHttpContext().User.Claims.First(f => f.Type == nameof(EnumCustomClaimType.Session)).Value;
+    }
+    
     private async Task SetAreVotesBeingShowed(bool isVotesBeingShowed, string sessionId)
     {
         await _semaphoreSlim.WaitAsync();
@@ -128,57 +170,10 @@ public class PointingPokerHub : Hub
 
         _semaphoreSlim.Release();
     }
-
-    private async Task DisconnectUser(Exception? exception = null)
-    {
-        var userModel = GetCurrentUserModel();
-
-        if (userModel != null)
-        {
-            await _semaphoreSlim.WaitAsync();
-
-            userModel = GetCurrentUserModel();
-
-            if (userModel != null)
-            {
-                if (_userModelListBySession[userModel.SessionId].Remove(userModel) &&
-                    _userModelListBySession[userModel.SessionId].Count == 0)
-                {
-                    if (_userModelListBySession.Remove(userModel.SessionId))
-                    {
-                        _areVotesBeingShowedBySession.Remove(userModel.SessionId);
-                    }
-                }
-                
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, userModel.SessionId);
-
-                await Clients.GroupExcept(userModel.SessionId, this.Context.ConnectionId)
-                    .SendAsync("UserDisconnected", userModel);
-
-                await Clients.GroupExcept(userModel.SessionId, this.Context.ConnectionId)
-                    .SendAsync("SetVoteResult", GetVoteModel(userModel.SessionId));
-            }
-            
-            _semaphoreSlim.Release();
-        }
-
-        await base.OnDisconnectedAsync(exception ?? new Exception());
-    }
-
-    private VoteModel GetVoteModel(string sessionId)
-    {
-        var voteModel = new VoteModel(_userModelListBySession[sessionId]);
-
-        return voteModel;
-    }
-
-    private string GetSessionId()
-    {
-        return Context.GetHttpContext().User.Claims.First(f => f.Type == nameof(EnumCustomClaimType.Session)).Value;
-    }
     
-    public static bool DoesSessionExist(string sessionId)
+    private UserModel GetCurrentUserModel()
     {
-        return _userModelListBySession.ContainsKey(sessionId);
+        return _userModelListBySession.SelectMany(s => s.Value)
+            .FirstOrDefault(f => f.ConnectionId == Context.ConnectionId);
     }
 }
