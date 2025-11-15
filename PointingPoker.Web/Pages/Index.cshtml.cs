@@ -16,6 +16,6 @@ public class IndexModel : PageModel
     public void OnGet()
     {
         this.Username = User.Identity.Name;
-        this.SessionId = User.FindFirstValue(nameof(EnumCustomClaimType.Session))!;
+        this.SessionId = User.FindFirstValue(nameof(EnumCustomClaimType.Session));
     }
 }

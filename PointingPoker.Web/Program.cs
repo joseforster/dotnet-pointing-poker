@@ -10,7 +10,7 @@ builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.Cookie.Name = "PoitingPokerAuth";
+        options.Cookie.Name = "PointingPokerAuthentication";
         options.LoginPath = "/Login";
         options.ExpireTimeSpan = TimeSpan.FromDays(3);
     });

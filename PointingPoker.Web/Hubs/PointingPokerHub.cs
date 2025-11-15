@@ -3,11 +3,11 @@ using PointingPoker.Enums;
 
 public class PointingPokerHub : Hub
 {
-    private static Dictionary<string, List<UserModel>> _userModelListBySession = new ();
+    private static readonly Dictionary<string, List<UserModel>> _userModelListBySession = new ();
 
     private static readonly SemaphoreSlim _semaphoreSlim = new (1, 1);
 
-    private static Dictionary<string, bool> _areVotesBeingShowedBySession = new ();
+    private static readonly Dictionary<string, bool> _areVotesBeingShowedBySession = new ();
 
     public override async Task OnConnectedAsync()
     {
@@ -175,5 +175,10 @@ public class PointingPokerHub : Hub
     private string GetSessionId()
     {
         return Context.GetHttpContext().User.Claims.First(f => f.Type == nameof(EnumCustomClaimType.Session)).Value;
+    }
+    
+    public static bool DoesSessionExist(string sessionId)
+    {
+        return _userModelListBySession.ContainsKey(sessionId);
     }
 }
