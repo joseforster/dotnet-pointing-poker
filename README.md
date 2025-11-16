@@ -31,6 +31,7 @@ TODO
 
 ## 📦 Installation
 
+```bash
 git clone https://github.com/joseforster/dotnet-pointing-poker
 cd dotnet-pointing-poker
 dotnet run
