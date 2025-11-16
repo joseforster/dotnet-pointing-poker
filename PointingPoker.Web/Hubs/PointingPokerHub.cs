@@ -153,7 +153,7 @@ public class PointingPokerHub : Hub
         }
         else
         {
-            return  new VoteModel(Enumerable.Empty<UserModel>());
+            return new VoteModel(Enumerable.Empty<UserModel>());
         }
     }
 

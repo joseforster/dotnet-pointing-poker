@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/PointingPoker.styles.css" asp-append-version="true"/>
+    <link rel="icon" type="image/png" href="~/img/pointing-poker-img.png"/>
 </head>
 
 <body>
@@ -20,7 +21,9 @@
                 if (User.Identity != null && User.Identity.IsAuthenticated)
                 {
                     <form class="d-flex" method="post">
-                        <button class="btn btn-outline-danger" asp-page-handler="ExitSession" id="btn-exit-session" onclick="exitSession()" type="submit">Exit Session</button>
+                        <button class="btn btn-outline-danger" asp-page-handler="ExitSession" id="btn-exit-session"
+                                onclick="exitSession()" type="submit">Exit Session
+                        </button>
                     </form>
                 }
             }
@@ -34,10 +37,19 @@
 </div>
 
 <footer class="border-top footer text-muted">
-    <div class="container inline-block">
-            <span>
-                &copy; 2025 - <strong>PointingPoker</strong>
-            </span>
+    <div class="container d-flex justify-content-between">
+        <span>
+            &copy; @DateTime.Now.Year - <strong>PointingPoker</strong>
+        </span>
+        <div class="d-flex gap-2">
+            <a href="https://www.linkedin.com/in/josemiguelforster/" target="_blank">
+                <img src="~/img/linkedin.png" alt="LinkedIn" width="32" height="32"/>
+            </a>
+            <a href="https://github.com/joseforster" target="_blank">
+                <img src="~/img/github.png" alt="GitHub" width="32" height="32"/>
+            </a>    
+        </div>
+        
     </div>
 </footer>
 
