@@ -9,7 +9,16 @@ mapVoteScaleByClass.set(2, "text-bg-warning");
 mapVoteScaleByClass.set(3, "text-bg-danger");
 mapVoteScaleByClass.set(4, "text-bg-dark");
 
-var connection = new signalR.HubConnectionBuilder().withUrl("/pointingpokerhub").build();
+class AlwaysRetryReconnectPolicy {
+    nextRetryDelayInMilliseconds(retryContext) {
+        return 5000;
+    }
+}
+
+var connection = new signalR.HubConnectionBuilder()
+    .withUrl("/pointingpokerhub")
+    .withAutomaticReconnect(new AlwaysRetryReconnectPolicy())
+    .build();
 
 connection.on("NewUserHasConnected", function (user) {
     addUser(user);
@@ -96,10 +105,9 @@ connection.on("ShowVotes", function (users) {
 connection.on("ClearVotes", function () {
 
     let userVoteList = document.getElementsByName("user-vote");
+    
     userVoteList.forEach(userVote => {
-
         userVote.classList.remove(...classList);
-
     });
 
     let myVoteSpan = document.getElementById("my-vote");
@@ -116,6 +124,15 @@ connection.on("ClearVotes", function () {
     voteCard.classList.add("text-secondary");
 });
 
+connection.on("UserOffline", function (user) {
+    
+    let userListItem = document.getElementsByName("user-list-item-" + user.connectionId);
+    userListItem.classList.add("bg-danger-subtle");
+    
+    let username = document.getElementById("username-" + user.connectionId);
+    username.textContent += " (OFFLINE)";
+});
+
 connection.start().then(function () {
     let myConnectionId = document.getElementById("my-connection-id");
     myConnectionId.setAttribute("value", connection.connectionId);
@@ -124,7 +141,7 @@ connection.start().then(function () {
 });
 
 window.addEventListener("beforeunload", () => {
-    connection.stop();
+    connection.invoke("ExitSession");
 });
 
 document.getElementsByName("green-vote-button").forEach(btn =>
@@ -171,37 +188,53 @@ function setVote(voteValue, className) {
 
 function addUser(user, areVotesBeingShowed) {
 
-    let li = document.createElement("li");
+    let listItemId = "user-list-item-" + user.connectionId;
 
-    li.classList.add("list-group-item");
-    li.classList.add("d-flex");
-    li.classList.add("justify-content-between");
-    li.classList.add("align-items-center");
-    li.setAttribute("name", "user-list-item");
-    li.textContent = user.username;
-    li.id = "user-list-item-" + user.connectionId;
+    let userListItem = document.getElementById(listItemId);
+    
+    if (!userListItem) {
+        let listItem = document.createElement("li");
 
-    document.getElementById("user-list").appendChild(li);
+        listItem.classList.add("list-group-item");
+        listItem.classList.add("d-flex");
+        listItem.classList.add("justify-content-between");
+        listItem.classList.add("align-items-center");
+        listItem.setAttribute("name", "user-list-item");
+        listItem.id = listItemId;
 
-    let span = document.createElement("span");
-    span.classList.add("badge");
-    span.classList.add("big-badge");
-    span.setAttribute("name", "user-vote");
-    span.id = "user-vote-" + user.connectionId;
+        let spanUsername = document.createElement("span");
+        spanUsername.id = "username-" + user.connectionId;
+        spanUsername.textContent = user.username;
 
-    if (user.hasVoted) {
-        if (areVotesBeingShowed) {
-            span.textContent = user.currentVote;
-            span.classList.add(mapVoteScaleByClass.get(user.voteScale));
-        } else {
-            span.classList.add("text-bg-primary");
-            span.textContent = "OK";
+        listItem.appendChild(spanUsername);
+
+        document.getElementById("user-list").appendChild(listItem);
+
+        let spanUserVote = document.createElement("span");
+        spanUserVote.classList.add("badge");
+        spanUserVote.classList.add("big-badge");
+        spanUserVote.setAttribute("name", "user-vote");
+        spanUserVote.id = "user-vote-" + user.connectionId;
+
+        if (user.hasVoted) {
+            if (areVotesBeingShowed) {
+                spanUserVote.textContent = user.currentVote;
+                spanUserVote.classList.add(mapVoteScaleByClass.get(user.voteScale));
+            } else {
+                spanUserVote.classList.add("text-bg-primary");
+                spanUserVote.textContent = "OK";
+            }
         }
-    }
 
-    li.appendChild(span);
+        listItem.appendChild(spanUserVote);
+    }else if(userListItem.classList.contains("bg-danger-subtle")) {
+        userListItem.classList.remove("bg-danger-subtle");
+
+        let spanUsername = document.getElementById("username-" + user.connectionId);
+        spanUsername.textContent = user.usernamespanUsername.textContent.replace("(OFFLINE)", "");
+    }
 }
 
-function exitSession(){
-    connection.stop();
+function exitSession() {
+    connection.invoke("ExitSession");
 }

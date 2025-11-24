@@ -9,6 +9,9 @@ public class LoginModel : PageModel
 {
     public string Erro { get; private set; }
 
+    private const int MIN_SESSION_NUMBER = 1;
+    private const int MAX_SESSION_NUMBER = 1000000;
+
     public async Task<IActionResult> OnPostJoinSession([FromForm] string username, string session)
     {
         if (string.IsNullOrEmpty(session))
@@ -28,11 +31,11 @@ public class LoginModel : PageModel
 
     public async Task<IActionResult> OnPostCreateSession([FromForm] string username, string session)
     {
-        session = new Random().Next(1, 1000000).ToString();
+        session = new Random().Next(MIN_SESSION_NUMBER, MAX_SESSION_NUMBER).ToString();
 
         while (PointingPokerHub.DoesSessionExist(session))
         {
-            session = new Random().Next(1, 1000000).ToString();
+            session = new Random().Next(MIN_SESSION_NUMBER, MAX_SESSION_NUMBER).ToString();
         }
 
         return await SignInUser(username, session);
