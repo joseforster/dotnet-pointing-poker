@@ -47,6 +47,7 @@ public class LoginModel : PageModel
         {
             new(ClaimTypes.Name, username),
             new(nameof(EnumCustomClaimType.Session), session),
+            new(nameof(EnumCustomClaimType.Guid), Guid.NewGuid().ToString()),
         };
 
         var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

@@ -146,6 +146,6 @@ public class VoteModelTest
 
     private UserModel CreateEmptyUserModel()
     {
-        return new UserModel(string.Empty, string.Empty, string.Empty);
+        return new UserModel(string.Empty, string.Empty, string.Empty, Guid.NewGuid().ToString());
     }
 }

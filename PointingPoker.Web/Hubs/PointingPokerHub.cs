@@ -13,8 +13,14 @@ public class PointingPokerHub : Hub
     {
         await base.OnConnectedAsync();
 
-        var username = Context.GetHttpContext().User.Identity.Name!;
-        var sessionId = GetSessionId();
+        var sessionId = GetCookieValue<string>(EnumCustomClaimType.Session);
+
+        var guid = GetCookieValue<string>(EnumCustomClaimType.Guid);
+
+        if (_userModelListBySession.ContainsKey(sessionId) && _userModelListBySession[sessionId].Any(an => an.Guid == guid))
+        {
+            return;
+        }
 
         await Groups.AddToGroupAsync(Context.ConnectionId, sessionId);
 
@@ -43,7 +49,10 @@ public class PointingPokerHub : Hub
         await Clients.Caller.SendAsync("SetUserList", _userModelListBySession[sessionId],
             _areVotesBeingShowedBySession[sessionId]);
 
-        var userHubModel = new UserModel(Context.ConnectionId, username, sessionId);
+
+        var username = Context.User.Identity.Name!;
+
+        var userHubModel = new UserModel(Context.ConnectionId, username, sessionId, guid);
 
         if (!_userModelListBySession[sessionId].Contains(userHubModel))
         {
@@ -62,7 +71,8 @@ public class PointingPokerHub : Hub
             }
         }
 
-        await Clients.GroupExcept(sessionId, this.Context.ConnectionId).SendAsync("NewUserHasConnected", userHubModel);
+        await Clients.GroupExcept(sessionId, this.Context.ConnectionId)
+            .SendAsync("NewUserHasConnected", userHubModel);
 
         if (_areVotesBeingShowedBySession[sessionId])
         {
@@ -104,7 +114,7 @@ public class PointingPokerHub : Hub
 
     public async Task OnShowVotes()
     {
-        string sessionId = GetSessionId();
+        var sessionId = GetCookieValue<string>(EnumCustomClaimType.Session);
 
         await SetAreVotesBeingShowed(true, sessionId);
 
@@ -114,7 +124,7 @@ public class PointingPokerHub : Hub
 
     public async Task OnClearVotes()
     {
-        string sessionId = GetSessionId();
+        var sessionId = GetCookieValue<string>(EnumCustomClaimType.Session);
 
         await SetAreVotesBeingShowed(false, sessionId);
 
@@ -190,9 +200,9 @@ public class PointingPokerHub : Hub
         }
     }
 
-    private string GetSessionId()
+    private T GetCookieValue<T>(EnumCustomClaimType enumCustomClaimType)
     {
-        return Context.GetHttpContext().User.Claims.First(f => f.Type == nameof(EnumCustomClaimType.Session)).Value;
+        return (T)Convert.ChangeType(Context.User.Claims.First(f => f.Type == enumCustomClaimType.ToString()).Value, typeof(T));
     }
 
     private async Task SetAreVotesBeingShowed(bool isVotesBeingShowed, string sessionId)

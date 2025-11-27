@@ -1,10 +1,11 @@
 public class UserModel
 {
-    public UserModel(string connectionId, string username, string sessionId)
+    public UserModel(string connectionId, string username, string sessionId, string guid)
     {
         ConnectionId = connectionId;
         Username = username;
         SessionId = sessionId;
+        Guid = guid;
     }
 
     public string ConnectionId { get; private set; }
@@ -20,6 +21,8 @@ public class UserModel
     public bool HasVoted => !string.IsNullOrEmpty(this.CurrentVote);
     
     public bool IsVoteAnNumber => decimal.TryParse(this.CurrentVote, out _);
+    
+    public string Guid  { get; private set; } = string.Empty;
 
     private VoteScaleHelper _voteScaleHelper = new VoteScaleHelper();
 
