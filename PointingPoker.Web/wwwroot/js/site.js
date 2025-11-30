@@ -1,21 +1,28 @@
 ﻿"use strict";
 
-var classList = ["text-bg-success", "text-bg-warning", "text-bg-danger", "text-bg-dark", "text-bg-primary", "text-bg-light", "text-secondary"];
+let classList = ["text-bg-success", "text-bg-warning", "text-bg-danger", "text-bg-dark", "text-bg-primary", "text-bg-light", "text-secondary"];
 
-var mapVoteScaleByClass = new Map();
+let mapVoteScaleByClass = new Map();
 mapVoteScaleByClass.set(0, "text-bg-light");
 mapVoteScaleByClass.set(1, "text-bg-success");
 mapVoteScaleByClass.set(2, "text-bg-warning");
 mapVoteScaleByClass.set(3, "text-bg-danger");
 mapVoteScaleByClass.set(4, "text-bg-dark");
 
+let connectionStatus = document.getElementById("my-connection-status");
+
 class AlwaysRetryReconnectPolicy {
     nextRetryDelayInMilliseconds(retryContext) {
+
+        let msg = retryContext.previousRetryCount > 1 ? retryContext.previousRetryCount + " tries." : retryContext.previousRetryCount + " try.";
+
+        connectionStatus.textContent = " reconnecting " + msg;
+
         return 5000;
     }
 }
 
-var connection = new signalR.HubConnectionBuilder()
+let connection = new signalR.HubConnectionBuilder()
     .withUrl("/pointingpokerhub")
     .withAutomaticReconnect(new AlwaysRetryReconnectPolicy())
     .build();
@@ -88,11 +95,9 @@ connection.on("UserDisconnected", function (user) {
 });
 
 connection.on("ShowVotes", function (users) {
-    let myConnectionId = document.getElementById("my-connection-id").getAttribute("value");
-
     users.forEach(user => {
 
-        if (myConnectionId != user.connectionId) {
+        if (connection.connectionId != user.connectionId) {
             let userVote = document.getElementById("user-vote-" + user.connectionId);
 
             userVote.textContent = user.currentVote;
@@ -105,7 +110,7 @@ connection.on("ShowVotes", function (users) {
 connection.on("ClearVotes", function () {
 
     let userVoteList = document.getElementsByName("user-vote");
-    
+
     userVoteList.forEach(userVote => {
         userVote.classList.remove(...classList);
     });
@@ -124,21 +129,28 @@ connection.on("ClearVotes", function () {
     voteCard.classList.add("text-secondary");
 });
 
-connection.on("UserOffline", function (user) {
+connection.on("UserHasReconnected", function (oldConnectionId, newConnectionId) {
+    let userListItem = document.getElementById("user-list-item-" + oldConnectionId);
     
-    let userListItem = document.getElementsByName("user-list-item-" + user.connectionId);
-    userListItem.classList.add("bg-danger-subtle");
+    userListItem.id = "user-list-item-" + newConnectionId;
     
-    let username = document.getElementById("username-" + user.connectionId);
-    username.textContent += " (OFFLINE)";
+    let userVote = document.getElementById("user-vote-" + oldConnectionId);
+    userVote.id = "user-vote-" + newConnectionId;
 });
 
-connection.start().then(function () {
-    let myConnectionId = document.getElementById("my-connection-id");
-    myConnectionId.setAttribute("value", connection.connectionId);
-}).catch(function (err) {
-    return alert(err.toString());
+connection.onclose(function () {
+    changeConnectionStatus("offline", "text-bg-danger");
 });
+
+connection.onreconnected(function () {
+    changeConnectionStatus("online", "text-bg-success");
+});
+
+connection.onreconnecting(function () {
+    changeConnectionStatus("reconnecting", "text-bg-warning");
+});
+
+connection.start();
 
 window.addEventListener("beforeunload", () => {
     connection.invoke("ExitSession");
@@ -174,6 +186,12 @@ document.getElementById("clear-votes-button").addEventListener("click", function
     connection.invoke("OnClearVotes");
 });
 
+function changeConnectionStatus(text, className) {
+    connectionStatus.classList.remove(...classList);
+    connectionStatus.classList.add(className);
+    connectionStatus.textContent = text;
+}
+
 function setVote(voteValue, className) {
 
     let myVote = document.getElementById("my-vote");
@@ -191,7 +209,7 @@ function addUser(user, areVotesBeingShowed) {
     let listItemId = "user-list-item-" + user.connectionId;
 
     let userListItem = document.getElementById(listItemId);
-    
+
     if (!userListItem) {
         let listItem = document.createElement("li");
 
@@ -227,11 +245,6 @@ function addUser(user, areVotesBeingShowed) {
         }
 
         listItem.appendChild(spanUserVote);
-    }else if(userListItem.classList.contains("bg-danger-subtle")) {
-        userListItem.classList.remove("bg-danger-subtle");
-
-        let spanUsername = document.getElementById("username-" + user.connectionId);
-        spanUsername.textContent = user.usernamespanUsername.textContent.replace("(OFFLINE)", "");
     }
 }
 

@@ -17,7 +17,11 @@
 <header>
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
         <div class="container">
-            <span class="navbar-brand text-primary">PointingPoker</span>
+            <span class="navbar-brand text-primary">
+                <span class="fs-3 fw-semibold">Pointing</span>
+                <span class="fs-3 fw-bold">Poker</span>
+                <span class="badge rounded-pill text-bg-success ms-2" id="my-connection-status">online</span>
+            </span>
             @{
                 if (User.Identity != null && User.Identity.IsAuthenticated)
                 {
@@ -40,14 +44,11 @@
 <footer class="border-top footer text-muted">
     <div class="container d-flex justify-content-between">
         <span>
-            &copy; @DateTime.Now.Year - <strong>PointingPoker - BETA</strong> - @FileVersionInfo.GetVersionInfo(GetType().Assembly.Location).FileVersion
+            &copy; @DateTime.Now.Year - José Forster - <strong>PointingPoker - BETA</strong> - @FileVersionInfo.GetVersionInfo(GetType().Assembly.Location).FileVersion
         </span>
         <div class="d-flex gap-2">
             <a href="https://github.com/joseforster/dotnet-pointing-poker" target="_blank">
                 <img src="~/img/github.png" alt="GitHub" width="32" height="32"/>
-            </a>
-            <a href="https://www.linkedin.com/in/josemiguelforster/" target="_blank">
-                <img src="~/img/linkedin.png" alt="LinkedIn" width="32" height="32"/>
             </a>
         </div>
 

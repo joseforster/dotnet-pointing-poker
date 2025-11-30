@@ -54,9 +54,7 @@ public class LoginModel : PageModel
 
         var authProperties = new AuthenticationProperties
         {
-            IsPersistent = true,
-            ExpiresUtc = DateTimeOffset.UtcNow.Add(TimeSpan.FromDays(3)),
-            IssuedUtc = DateTimeOffset.UtcNow,
+            IsPersistent = true
         };
 
         await HttpContext.SignInAsync(

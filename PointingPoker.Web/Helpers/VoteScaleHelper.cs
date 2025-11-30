@@ -2,7 +2,7 @@ public class VoteScaleHelper
 {
     public static readonly int MINIMAL_VOTE = 0;
     public static readonly int LIMIT_BETWEEN_LOW_MEDIUM_VOTE = 12;
-    public static readonly int LIMIT_BETWEEN_MEDIUM_HIGH_VOTE = 60;
+    public static readonly int LIMIT_BETWEEN_MEDIUM_HIGH_VOTE = 50;
     public static readonly string UNDECIDED_VOTE = "?";
     
     private Dictionary<EnumVoteScale, List<int>> _voteScaleByMinMax = new()
