@@ -2,9 +2,9 @@ public class VoteModel
 {
     public VoteModel(IEnumerable<UserModel> userModels)
     {
+        _voteScaleHelper = new VoteScaleHelper();
         SetVoteResult(userModels);
         SetEnumVoteScale();
-        _voteScaleHelper = new VoteScaleHelper();
     }
 
     public string VoteResult { get; private set; }
