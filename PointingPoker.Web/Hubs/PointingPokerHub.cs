@@ -25,9 +25,10 @@ public class PointingPokerHub : Hub
             var userModel = _userModelListBySession[sessionId].First(f => f.Guid == guid);
 
             _userModelListBySession[sessionId].Remove(userModel);
+            
             await Groups.RemoveFromGroupAsync(userModel.ConnectionId, sessionId);
             
-            await Clients.GroupExcept(sessionId, this.Context.ConnectionId)
+            await Clients.GroupExcept(sessionId, Context.ConnectionId)
                 .SendAsync("UserHasReconnected", userModel.ConnectionId, Context.ConnectionId);
         }
 
@@ -58,9 +59,7 @@ public class PointingPokerHub : Hub
         await Clients.Caller.SendAsync("SetUserList", _userModelListBySession[sessionId],
             _areVotesBeingShowedBySession[sessionId]);
 
-        var username = Context.User.Identity.Name!;
-
-        var userHubModel = new UserModel(Context.ConnectionId, username, sessionId, guid);
+        var userHubModel = new UserModel(Context.ConnectionId, Context.User.Identity.Name, sessionId, guid);
 
         if (!_userModelListBySession[sessionId].Contains(userHubModel))
         {
