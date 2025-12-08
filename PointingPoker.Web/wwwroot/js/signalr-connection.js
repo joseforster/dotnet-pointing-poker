@@ -1,9 +1,9 @@
-import {addUser, changeConnectionStatus, classList, mapVoteScaleByClass} from "./shared.js";
-
 class AlwaysRetryReconnectPolicy {
-    nextRetryDelayInMilliseconds(retryContext) {
-
-        let msg = " reconnecting " + retryContext.previousRetryCount > 1 ? retryContext.previousRetryCount + " tries." : retryContext.previousRetryCount + " try.";
+    nextRetryDelayInMilliseconds(retryContext){
+        
+        let retrySuffix = retryContext.previousRetryCount == 1 ? "try" : "tries";
+        
+        let msg = `reconnecting (${retryContext.previousRetryCount} ${retrySuffix})`;
 
         changeConnectionStatus(msg, "text-bg-warning");
         
@@ -11,10 +11,11 @@ class AlwaysRetryReconnectPolicy {
     }
 }
 
-export let connection = new signalR.HubConnectionBuilder()
+let connection = new signalR.HubConnectionBuilder()
     .withUrl("/pointingpokerhub")
     .withAutomaticReconnect(new AlwaysRetryReconnectPolicy())
     .build();
+
 
 connection.on("NewUserHasConnected", function (user) {
     addUser(user);

@@ -1,6 +1,6 @@
-export let classList = ["text-bg-success", "text-bg-warning", "text-bg-danger", "text-bg-dark", "text-bg-primary", "text-bg-light", "text-secondary"];
+let classList = ["text-bg-success", "text-bg-warning", "text-bg-danger", "text-bg-dark", "text-bg-primary", "text-bg-light", "text-secondary"];
 
-export let mapVoteScaleByClass = new Map([
+let mapVoteScaleByClass = new Map([
     [0, "text-bg-light"],
     [1, "text-bg-success"],
     [2, "text-bg-warning"],
@@ -8,7 +8,7 @@ export let mapVoteScaleByClass = new Map([
     [4, "text-bg-dark"]
 ]);
 
-export function changeConnectionStatus(text, className) {
+function changeConnectionStatus(text, className) {
     
     let connectionStatus =  document.getElementById("my-connection-status");
     
@@ -17,7 +17,7 @@ export function changeConnectionStatus(text, className) {
     connectionStatus.textContent = text;
 }
 
-export function setVote(voteValue, className) {
+async function setVote(voteValue, className) {
 
     let myVote = document.getElementById("my-vote");
 
@@ -25,9 +25,11 @@ export function setVote(voteValue, className) {
     myVote.classList.add(className);
 
     myVote.textContent = voteValue;
+
+    await connection.invoke("OnUserVoted", voteValue);
 }
 
-export function addUser(user, areVotesBeingShowed) {
+function addUser(user, areVotesBeingShowed) {
 
     let userListItemId = "user-list-item-" + user.connectionId;
     let userVoteId = "user-vote-" + user.connectionId;

@@ -1,30 +1,23 @@
-import {setVote} from "./shared.js";
-import {connection} from "./signalr-connection.js";
-
 document.getElementsByName("green-vote-button").forEach(btn =>
     btn.addEventListener(("click"), async () => {
-        setVote(btn.textContent, "text-bg-success");
-        await connection.invoke("OnUserVoted", btn.textContent);
+        await setVote(btn.textContent, "text-bg-success");
     })
 );
 
 document.getElementsByName("yellow-vote-button").forEach(btn =>
     btn.addEventListener(("click"), async () => {
-        setVote(btn.textContent, "text-bg-warning");
-        await connection.invoke("OnUserVoted", btn.textContent);
+        await setVote(btn.textContent, "text-bg-warning");
     })
 );
 
 document.getElementsByName("red-vote-button").forEach(btn =>
     btn.addEventListener(("click"), async () => {
-        setVote(btn.textContent, "text-bg-danger");
-        await connection.invoke("OnUserVoted", btn.textContent);
+        await setVote(btn.textContent, "text-bg-danger");
     })
 );
 
 document.getElementById("empty-vote-button").addEventListener("click", async () => {
-    setVote("?", "text-bg-dark");
-    await connection.invoke("OnUserVoted", btn.textContent);
+    await setVote("?", "text-bg-dark");
 });
 
 document.getElementById("show-votes-button").addEventListener("click", async () => {
@@ -39,6 +32,6 @@ window.addEventListener("beforeunload", async () => {
     await connection.invoke("ExitSession");
 });
 
-export function exitSession() {
+function exitSession() {
     connection.invoke("ExitSession");
 }
