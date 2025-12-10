@@ -43,6 +43,7 @@ CodeCoverage/
 .idea/
 *.user
 publish/
+publish.sh
 
 # MSBuild Binary and Structured Log
 *.binlog
