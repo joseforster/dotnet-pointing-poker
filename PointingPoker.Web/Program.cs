@@ -6,8 +6,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddSignalR(s =>
 {
-    s.EnableDetailedErrors = true;
-    s.ClientTimeoutInterval = TimeSpan.FromHours(8);
+    if (builder.Environment.IsDevelopment())
+    {
+        s.EnableDetailedErrors = true;
+    }
+    s.ClientTimeoutInterval = TimeSpan.FromMinutes(2);
+    s.KeepAliveInterval = TimeSpan.FromMinutes(1);
 });
 
 builder.Services
