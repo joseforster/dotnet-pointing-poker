@@ -16,6 +16,8 @@ let connection = new signalR.HubConnectionBuilder()
     .withAutomaticReconnect(new AlwaysRetryReconnectPolicy())
     .build();
 
+connection.keepAliveIntervalInMilliseconds = 60000;
+connection.serverTimeoutInMilliseconds = 120000;
 
 connection.on("NewUserHasConnected", function (user) {
     addUser(user);
