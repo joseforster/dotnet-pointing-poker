@@ -2,7 +2,7 @@ public class VoteModel
 {
     public VoteModel(IEnumerable<UserModel> userModels)
     {
-        _voteScaleHelper = new VoteScaleHelper();
+        _voteScaleModel = new VoteScaleModel();
         SetVoteResult(userModels);
         SetEnumVoteScale();
     }
@@ -11,7 +11,7 @@ public class VoteModel
 
     public EnumVoteScale VoteScale { get; private set; }
 
-    private readonly VoteScaleHelper _voteScaleHelper;
+    private readonly VoteScaleModel _voteScaleModel;
 
 
     private void SetVoteResult(IEnumerable<UserModel> userModels)
@@ -20,7 +20,7 @@ public class VoteModel
 
         if (usersThatVoted.Any() && usersThatVoted.All(a => !a.IsVoteAnNumber))
         {
-            VoteResult = VoteScaleHelper.UNDECIDED_VOTE;
+            VoteResult = VoteScaleModel.UNDECIDED_VOTE;
             return;
         }
 
@@ -42,6 +42,6 @@ public class VoteModel
 
     private void SetEnumVoteScale()
     {
-        this.VoteScale = _voteScaleHelper.GetEnumVoteScale(this.VoteResult);
+        this.VoteScale = _voteScaleModel.GetEnumVoteScale(this.VoteResult);
     }
 }

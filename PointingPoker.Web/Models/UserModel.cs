@@ -24,11 +24,16 @@ public class UserModel
     
     public string Guid  { get; private set; } = string.Empty;
 
-    private VoteScaleHelper _voteScaleHelper = new VoteScaleHelper();
+    private VoteScaleModel _voteScaleModel = new VoteScaleModel();
 
     public void SetCurrentVote(string vote)
     {
         CurrentVote = vote;
-        VoteScale = _voteScaleHelper.GetEnumVoteScale(vote);
+        VoteScale = _voteScaleModel.GetEnumVoteScale(vote);
+    }
+
+    public void SetConnectionId(string connectionId)
+    {
+        ConnectionId = connectionId;
     }
 }

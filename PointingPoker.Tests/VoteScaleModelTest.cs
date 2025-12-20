@@ -1,18 +1,18 @@
 ﻿namespace PointingPoker.Tests;
 
 [TestClass]
-public sealed class VoteScaleHelperTest
+public sealed class VoteScaleModelTest
 {
-    private readonly VoteScaleHelper voteScaleHelper = new VoteScaleHelper();
+    private readonly VoteScaleModel _voteScaleModel = new VoteScaleModel();
 
     [TestMethod]
     public void GetEnumVoteScale_WithHighVote_ReturnEnumVoteScaleHigh()
     {
-        var valorInicial = VoteScaleHelper.LIMIT_BETWEEN_MEDIUM_HIGH_VOTE;
+        var valorInicial = VoteScaleModel.LIMIT_BETWEEN_MEDIUM_HIGH_VOTE;
 
         for (int i = 0; i < 10; i++)
         {
-            var result = voteScaleHelper.GetEnumVoteScale(valorInicial.ToString());
+            var result = _voteScaleModel.GetEnumVoteScale(valorInicial.ToString());
 
             Assert.AreEqual(EnumVoteScale.High, result);
 
@@ -23,12 +23,12 @@ public sealed class VoteScaleHelperTest
     [TestMethod]
     public void GetEnumVoteScale_WithMediumVote_ReturnEnumVoteScaleMedium()
     {
-        var valorInicial = VoteScaleHelper.LIMIT_BETWEEN_LOW_MEDIUM_VOTE + 1;
-        var valorFinal = VoteScaleHelper.LIMIT_BETWEEN_MEDIUM_HIGH_VOTE -1;
+        var valorInicial = VoteScaleModel.LIMIT_BETWEEN_LOW_MEDIUM_VOTE + 1;
+        var valorFinal = VoteScaleModel.LIMIT_BETWEEN_MEDIUM_HIGH_VOTE -1;
 
         for (var i = valorInicial; i <= valorFinal; i++)
         {
-            var result = voteScaleHelper.GetEnumVoteScale(i.ToString());
+            var result = _voteScaleModel.GetEnumVoteScale(i.ToString());
 
             Assert.AreEqual(EnumVoteScale.Medium, result);
         }
@@ -37,12 +37,12 @@ public sealed class VoteScaleHelperTest
     [TestMethod]
     public void GetEnumVoteScale_WithLowVote_ReturnEnumVoteScaleLow()
     {
-        var valorInicial = VoteScaleHelper.MINIMAL_VOTE;
-        var valorFinal = VoteScaleHelper.LIMIT_BETWEEN_LOW_MEDIUM_VOTE - 1;
+        var valorInicial = VoteScaleModel.MINIMAL_VOTE;
+        var valorFinal = VoteScaleModel.LIMIT_BETWEEN_LOW_MEDIUM_VOTE - 1;
 
         for (var i = valorInicial; i <= valorFinal; i++)
         {
-            var result = voteScaleHelper.GetEnumVoteScale(i.ToString());
+            var result = _voteScaleModel.GetEnumVoteScale(i.ToString());
 
             Assert.AreEqual(EnumVoteScale.Low, result);
         }
@@ -51,7 +51,7 @@ public sealed class VoteScaleHelperTest
     [TestMethod]
     public void GetEnumVoteScale_WithUndecidedVote_ReturnEnumVoteScaleUndecided()
     {
-        var result = voteScaleHelper.GetEnumVoteScale(VoteScaleHelper.UNDECIDED_VOTE);
+        var result = _voteScaleModel.GetEnumVoteScale(VoteScaleModel.UNDECIDED_VOTE);
 
         Assert.AreEqual(EnumVoteScale.Undecided, result);
     }
@@ -59,7 +59,7 @@ public sealed class VoteScaleHelperTest
     [TestMethod]
     public void GetEnumVoteScale_WithEmptyVote_ReturnEnumVoteScaleEmpty()
     {
-        var result = voteScaleHelper.GetEnumVoteScale(string.Empty);
+        var result = _voteScaleModel.GetEnumVoteScale(string.Empty);
 
         Assert.AreEqual(EnumVoteScale.Empty, result);
     }
@@ -67,7 +67,7 @@ public sealed class VoteScaleHelperTest
     [TestMethod]
     public void GetEnumVoteScale_WithNegativeVote_ReturnEnumVoteScaleEmpty()
     {
-        var result = voteScaleHelper.GetEnumVoteScale("-1");
+        var result = _voteScaleModel.GetEnumVoteScale("-1");
 
         Assert.AreEqual(EnumVoteScale.Empty, result);
     }
@@ -75,7 +75,7 @@ public sealed class VoteScaleHelperTest
     [TestMethod]
     public void GetEnumVoteScale_WithInvalidVote_ReturnEnumVoteScaleEmpty()
     {
-        var result = voteScaleHelper.GetEnumVoteScale("abc");
+        var result = _voteScaleModel.GetEnumVoteScale("abc");
 
         Assert.AreEqual(EnumVoteScale.Empty, result);
     }

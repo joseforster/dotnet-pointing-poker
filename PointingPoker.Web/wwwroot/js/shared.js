@@ -30,7 +30,7 @@ async function setVote(voteValue, className) {
 }
 
 function addUser(user, areVotesBeingShowed) {
-
+    
     let userListItemId = "user-list-item-" + user.connectionId;
     let userVoteId = "user-vote-" + user.connectionId;
 
