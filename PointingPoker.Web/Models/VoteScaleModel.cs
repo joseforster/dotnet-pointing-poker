@@ -1,15 +1,15 @@
-public class VoteScaleHelper
+public class VoteScaleModel
 {
-    public static readonly int MINIMAL_VOTE = 0;
-    public static readonly int LIMIT_BETWEEN_LOW_MEDIUM_VOTE = 12;
-    public static readonly int LIMIT_BETWEEN_MEDIUM_HIGH_VOTE = 50;
-    public static readonly string UNDECIDED_VOTE = "?";
+    public const int MINIMAL_VOTE = 0;
+    public const int LIMIT_BETWEEN_LOW_MEDIUM_VOTE = 12;
+    public const int LIMIT_BETWEEN_MEDIUM_HIGH_VOTE = 50;
+    public const string UNDECIDED_VOTE = "?";
     
     private Dictionary<EnumVoteScale, List<int>> _voteScaleByMinMax = new()
     {
-        {EnumVoteScale.Low, new List<int>(){ MINIMAL_VOTE, LIMIT_BETWEEN_LOW_MEDIUM_VOTE } },
-        {EnumVoteScale.Medium, new List<int>(){ LIMIT_BETWEEN_LOW_MEDIUM_VOTE, LIMIT_BETWEEN_MEDIUM_HIGH_VOTE } },
-        {EnumVoteScale.High, new List<int>(){ LIMIT_BETWEEN_MEDIUM_HIGH_VOTE, int.MaxValue } },
+        {EnumVoteScale.Low, [MINIMAL_VOTE, LIMIT_BETWEEN_LOW_MEDIUM_VOTE] },
+        {EnumVoteScale.Medium, [LIMIT_BETWEEN_LOW_MEDIUM_VOTE, LIMIT_BETWEEN_MEDIUM_HIGH_VOTE] },
+        {EnumVoteScale.High, [LIMIT_BETWEEN_MEDIUM_HIGH_VOTE, int.MaxValue] },
     };
 
     public EnumVoteScale GetEnumVoteScale(string vote)

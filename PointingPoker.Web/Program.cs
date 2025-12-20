@@ -10,8 +10,6 @@ builder.Services.AddSignalR(s =>
     {
         s.EnableDetailedErrors = true;
     }
-    s.ClientTimeoutInterval = TimeSpan.FromMinutes(2);
-    s.KeepAliveInterval = TimeSpan.FromMinutes(1);
 });
 
 builder.Services
