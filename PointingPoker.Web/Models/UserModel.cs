@@ -20,7 +20,7 @@ public class UserModel
 
     public bool HasVoted => !string.IsNullOrEmpty(this.CurrentVote);
     
-    public bool IsVoteAnNumber => decimal.TryParse(this.CurrentVote, out _);
+    public bool IsVoteANumber => decimal.TryParse(this.CurrentVote, out _);
     
     public string Guid  { get; private set; } = string.Empty;
 
