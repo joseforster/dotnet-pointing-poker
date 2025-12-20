@@ -18,13 +18,13 @@ public class VoteModel
     {
         var usersThatVoted = userModels.Where(wh => wh.HasVoted);
 
-        if (usersThatVoted.Any() && usersThatVoted.All(a => !a.IsVoteAnNumber))
+        if (usersThatVoted.Any() && usersThatVoted.All(a => !a.IsVoteANumber))
         {
             VoteResult = VoteScaleModel.UNDECIDED_VOTE;
             return;
         }
 
-        usersThatVoted = usersThatVoted.Where(wh => wh.IsVoteAnNumber);
+        usersThatVoted = usersThatVoted.Where(wh => wh.IsVoteANumber);
 
         var userCount = usersThatVoted.Count();
 
