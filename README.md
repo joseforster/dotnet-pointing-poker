@@ -16,7 +16,9 @@ Built with ASP.NET Core, SignalR, and Bootstrap.
 
 ## 🖼️ Preview
 
-TODO
+<img width="1920" height="1200" alt="Screenshot from 2025-12-21 11-31-43" src="https://github.com/user-attachments/assets/12db0a65-c911-4ee7-8248-fcd0b0cfee0b" />
+<img width="1920" height="1200" alt="Screenshot from 2025-12-21 11-34-09" src="https://github.com/user-attachments/assets/28c3a010-3367-4969-89e1-78c2f7711128" />
+
 
 ---
 
@@ -25,7 +27,7 @@ TODO
 - **Backend:** ASP.NET Core, SignalR  
 - **Frontend:** Razor, Bootstrap 5  
 - **Language:** C#  
-- **Hosting:** TODO
+- **Hosting:** (https://pointingpoker.joseforster.com/)
 
 ---
 
