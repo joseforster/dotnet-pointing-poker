@@ -1,7 +1,9 @@
 using System.Collections.Concurrent;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.SignalR;
 using PointingPoker.Enums;
 using PointingPoker.Models;
+using Serilog;
 
 public class PointingPokerHub : Hub
 {
@@ -11,30 +13,39 @@ public class PointingPokerHub : Hub
     {
         await base.OnConnectedAsync();
 
-        var sessionId = GetCookieValue<string>(EnumCustomClaimType.Session);
-        var guid = GetCookieValue<string>(EnumCustomClaimType.Guid);
+        var sessionId = await GetCookieValue(EnumCustomClaimType.Session);
+        var guid = await GetCookieValue(EnumCustomClaimType.Guid);
+
+        if (string.IsNullOrEmpty(sessionId) || string.IsNullOrEmpty(guid))
+        {
+            return;
+        }
 
         var groupModel = GetGroupModelBySession(sessionId);
 
-        if (isReconnect(sessionId, guid))
+        if (groupModel.UserExistsByGuid(guid))
         {
-            var userModel = groupModel.GetUserModelByGuid(guid);
+            var currentUserModel = groupModel.GetUserModelByGuid(guid);
 
-            await Groups.RemoveFromGroupAsync(userModel.ConnectionId, sessionId);
+            await Groups.RemoveFromGroupAsync(currentUserModel.ConnectionId, sessionId);
 
             await Clients.GroupExcept(sessionId, Context.ConnectionId)
-                .SendAsync("UserHasReconnected", userModel.ConnectionId, Context.ConnectionId);
+                .SendAsync("UserHasReconnected", currentUserModel.ConnectionId, Context.ConnectionId);
 
-            userModel.SetConnectionId(Context.ConnectionId);
+            currentUserModel.SetConnectionId(Context.ConnectionId);
+
+            Log.Information("{Username} has reconnected in session {SessionId}.", currentUserModel.Username, sessionId);
         }
         else
         {
-            var userHubModel = new UserModel(Context.ConnectionId, Context.User.Identity.Name, sessionId, guid);
+            var newUserModel = new UserModel(Context.ConnectionId, Context.User.Identity.Name, sessionId, guid);
 
-            groupModel.AddUser(userHubModel);
+            groupModel.Users.Add(newUserModel);
 
             await Clients.GroupExcept(sessionId, this.Context.ConnectionId)
-                .SendAsync("NewUserHasConnected", userHubModel);
+                .SendAsync("NewUserHasConnected", newUserModel);
+
+            Log.Information("{Username} has joined the session {SessionId}.",newUserModel.Username, sessionId);
         }
 
         await Groups.AddToGroupAsync(Context.ConnectionId, sessionId);
@@ -46,6 +57,13 @@ public class PointingPokerHub : Hub
         {
             await Clients.All.SendAsync("SetVoteResult", groupModel.GetVoteModel());
         }
+        
+        LogSessionCount();
+    }
+
+    private static void LogSessionCount()
+    {
+        Log.Information("Currently {GroupCount} sessions and {UsersCount} users.", _groupsBySession.Count, _groupsBySession.Values.Sum(s => s.Users.Count));
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
@@ -55,11 +73,17 @@ public class PointingPokerHub : Hub
 
     public async Task OnUserVoted(string userVote)
     {
-        var sessionId = GetCookieValue<string>(EnumCustomClaimType.Session);
+        var sessionId = await GetCookieValue(EnumCustomClaimType.Session);
+        var guid =  await  GetCookieValue(EnumCustomClaimType.Guid);
+        
+        if (string.IsNullOrEmpty(sessionId) ||  string.IsNullOrEmpty(guid))
+        {
+            return;
+        }
 
         var groupModel = GetGroupModelBySession(sessionId);
 
-        var userModel = groupModel.GetUserModelByConnection(this.Context.ConnectionId);
+        var userModel = groupModel.GetUserModelByGuid(guid);
 
         userModel.SetCurrentVote(userVote);
 
@@ -79,19 +103,29 @@ public class PointingPokerHub : Hub
 
     public async Task OnShowVotes()
     {
-        var sessionId = GetCookieValue<string>(EnumCustomClaimType.Session);
+        var sessionId = await GetCookieValue(EnumCustomClaimType.Session);
+
+        if (string.IsNullOrEmpty(sessionId))
+        {
+            return;
+        }
 
         var groupModel = GetGroupModelBySession(sessionId);
 
         groupModel.AreVotesBeingShowed = true;
 
-        await Clients.Group(sessionId).SendAsync("ShowVotes", groupModel.GetUsers());
+        await Clients.Group(sessionId).SendAsync("ShowVotes", groupModel.Users);
         await Clients.Group(sessionId).SendAsync("SetVoteResult", groupModel.GetVoteModel());
     }
 
     public async Task OnClearVotes()
     {
-        var sessionId = GetCookieValue<string>(EnumCustomClaimType.Session);
+        var sessionId = await GetCookieValue(EnumCustomClaimType.Session);
+
+        if (string.IsNullOrEmpty(sessionId))
+        {
+            return;
+        }
 
         var groupModel = GetGroupModelBySession(sessionId);
 
@@ -104,19 +138,34 @@ public class PointingPokerHub : Hub
 
     public async Task ExitSession()
     {
-        var sessionId = GetCookieValue<string>(EnumCustomClaimType.Session);
+        var sessionId = await GetCookieValue(EnumCustomClaimType.Session);
+        var guid = await  GetCookieValue(EnumCustomClaimType.Guid);
+
+        if (string.IsNullOrEmpty(sessionId) || string.IsNullOrEmpty(guid))
+        {
+            return;
+        }
+        
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, sessionId);
 
         var groupModel = GetGroupModelBySession(sessionId);
 
-        var userModel = groupModel.GetUserModelByConnection(this.Context.ConnectionId);
-        
-        if (DoesSessionExist(userModel.SessionId))
-        {
-            groupModel.RemoveUser(userModel);
+        var userModel = groupModel.GetUserModelByGuid(guid);
 
-            if (groupModel.IsEmpty())
+        if (userModel == null)
+        {
+            return;
+        }
+        
+        if (DoesSessionExist(sessionId))
+        {
+            groupModel.Users.Remove(userModel);
+
+            if (!groupModel.Users.Any())
             {
-                _groupsBySession.TryRemove(userModel.SessionId, out _);
+                _groupsBySession.TryRemove(sessionId, out _);
+                
+                Log.Information("Session {SessionId} will be removed, {Username} was the last user.", sessionId, userModel.Username);
             }
             else
             {
@@ -128,10 +177,11 @@ public class PointingPokerHub : Hub
             }
         }
 
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, sessionId);
-
-        await Clients.GroupExcept(sessionId, this.Context.ConnectionId)
-            .SendAsync("UserDisconnected", userModel);
+        await Clients.Group(sessionId).SendAsync("UserDisconnected", userModel);
+        
+        Log.Information("User {Username} disconnected in session {SessionId}.", userModel.Username, sessionId);
+        
+        LogSessionCount();
     }
 
     public static bool DoesSessionExist(string sessionId)
@@ -139,16 +189,20 @@ public class PointingPokerHub : Hub
         return _groupsBySession.ContainsKey(sessionId);
     }
 
-    private T GetCookieValue<T>(EnumCustomClaimType enumCustomClaimType)
+    private async Task<string> GetCookieValue(EnumCustomClaimType enumCustomClaimType)
     {
-        return (T)Convert.ChangeType(Context.User.Claims.First(f => f.Type == enumCustomClaimType.ToString()).Value,
-            typeof(T));
-    }
+        var claim = Context.User.Claims.FirstOrDefault(f => f.Type == enumCustomClaimType.ToString());
 
-
-    private bool isReconnect(string sessionId, string guid)
-    {
-        return _groupsBySession.TryGetValue(sessionId, out GroupModel groupModel) && groupModel.UserExistsByGuid(guid);
+        if (claim == null)
+        {
+            await this.Context.GetHttpContext().SignOutAsync();
+            
+            Log.Information("Did not found cookie {Claim} on user {Username}.", enumCustomClaimType.ToString(), Context.User.Identity.Name);
+            
+            return string.Empty;
+        }
+        
+        return claim.Value;
     }
 
     private GroupModel GetGroupModelBySession(string sessionId)

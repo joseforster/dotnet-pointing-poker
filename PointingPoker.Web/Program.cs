@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,7 @@ builder.Services.AddSignalR(s =>
     }
 });
 
+
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -20,6 +22,14 @@ builder.Services
         options.LoginPath = "/Login";
         options.ExpireTimeSpan = TimeSpan.FromDays(3);
     });
+
+builder.Host.UseSerilog((context, services, config) =>
+{
+    config
+        .Enrich.FromLogContext()
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services);
+});
 
 var app = builder.Build();
 
