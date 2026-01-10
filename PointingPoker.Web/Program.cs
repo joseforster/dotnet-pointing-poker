@@ -1,6 +1,11 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Serilog;
 
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("/app/logs/log-.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -13,23 +18,16 @@ builder.Services.AddSignalR(s =>
     }
 });
 
-
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.Cookie.Name = "PointingPokerAuthentication";
+        options.Cookie.Name = "PointingPokerAuth";
         options.LoginPath = "/Login";
         options.ExpireTimeSpan = TimeSpan.FromDays(3);
     });
 
-builder.Host.UseSerilog((context, services, config) =>
-{
-    config
-        .Enrich.FromLogContext()
-        .ReadFrom.Configuration(context.Configuration)
-        .ReadFrom.Services(services);
-});
+builder.Services.AddSerilog();
 
 var app = builder.Build();
 
