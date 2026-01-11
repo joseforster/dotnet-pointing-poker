@@ -1,6 +1,7 @@
 # Pointing Poker
 
-A simple planning poker web app for agile teams, built with ASP.NET Core, SignalR, and Bootstrap.
+A simple planning poker web app for agile teams, built with ASP.NET Core, SignalR, and Bootstrap. Link Below:
+(https://pointingpoker.joseforster.com/)
 
 ---
 
@@ -24,7 +25,7 @@ A simple planning poker web app for agile teams, built with ASP.NET Core, Signal
 - **Backend:** ASP.NET Core, SignalR  
 - **Frontend:** Razor, Bootstrap 5  
 - **Language:** C#  
-- **Hosting:** (https://pointingpoker.joseforster.com/)
+- **Hosting:** Docker and Cloudflare tunnel as reverse proxy
 
 ---
 
@@ -34,3 +35,9 @@ A simple planning poker web app for agile teams, built with ASP.NET Core, Signal
 git clone https://github.com/joseforster/dotnet-pointing-poker
 cd dotnet-pointing-poker
 dotnet run
+
+Or, pulling from the public docker hub (in the example below I used port 3000)
+
+```bash
+docker pull jmforster/pointing-poker:latest
+docker run -d -p 3000:8080 --name pointing-poker jmforster/pointing-poker:latest
