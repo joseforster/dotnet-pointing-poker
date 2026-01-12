@@ -1,16 +1,17 @@
 # Pointing Poker
 
-A simple planning poker web app for agile teams, built with ASP.NET Core, SignalR, and Bootstrap.
+A simple planning poker web app for agile teams. UI built with Razor Pages and Bootstrap, real-time communication with SignalR, logging with Serilog, and authentication via Google OAuth.
 
-(https://pointingpoker.joseforster.com/)
+🔗 Live demo: https://pointingpoker.joseforster.com
 
 ---
 
 ## 🚀 Features
 
 - Real-time communication using SignalR  
-- Create and join sessions  
-- Select estimated hours and reveal results  
+- Create and join sessions
+- Select estimated hours and reveal results
+- Authentication via Google OAuth 
 
 ---
 
@@ -23,10 +24,12 @@ A simple planning poker web app for agile teams, built with ASP.NET Core, Signal
 
 ## 🛠️ Tech Stack
 
-- **Backend:** ASP.NET Core, SignalR  
+- **Backend:** ASP.NET Core (SignalR for real-time communication)  
 - **Frontend:** Razor, Bootstrap 5  
 - **Language:** C#  
-- **Hosting:** Docker, Cloudflare Tunnel as reverse proxy
+- **Hosting:** Self-hosted (Docker, Cloudflare Tunnel)  
+- **Security:** Google OAuth
+- **Logging:** Serilog
 
 ---
 
