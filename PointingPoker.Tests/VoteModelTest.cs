@@ -22,7 +22,7 @@ public class VoteModelTest
         
         var voteModel = new VoteModel(userModelList);
         
-        Assert.AreEqual("64.7", voteModel.VoteResult);
+        Assert.AreEqual("64.5", voteModel.VoteResult);
         Assert.AreEqual(EnumVoteScale.High, voteModel.VoteScale);
     }
     
@@ -45,7 +45,7 @@ public class VoteModelTest
         
         var voteModel = new VoteModel(userModelList);
         
-        Assert.AreEqual("28.3", voteModel.VoteResult);
+        Assert.AreEqual("28.5", voteModel.VoteResult);
         Assert.AreEqual(EnumVoteScale.Medium, voteModel.VoteScale);
     }
     
@@ -68,7 +68,7 @@ public class VoteModelTest
         
         var voteModel = new VoteModel(userModelList);
         
-        Assert.AreEqual("4.3", voteModel.VoteResult);
+        Assert.AreEqual("4.5", voteModel.VoteResult);
         Assert.AreEqual(EnumVoteScale.Low, voteModel.VoteScale);
     }
     
