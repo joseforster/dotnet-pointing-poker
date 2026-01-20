@@ -32,7 +32,11 @@ public class VoteModel
         {
             var voteSum = usersThatVoted.Sum(s => decimal.Parse(s.CurrentVote));
 
-            VoteResult = Math.Round(voteSum / userCount, 1).ToString();
+            var voteValue = voteSum / userCount;
+            
+            var roundedVoteValue = Math.Round(voteValue * 2, MidpointRounding.AwayFromZero) / 2;
+
+            VoteResult = roundedVoteValue.ToString();
         }
         else
         {

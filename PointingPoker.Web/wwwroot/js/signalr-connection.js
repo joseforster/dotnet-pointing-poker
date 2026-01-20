@@ -7,7 +7,7 @@ class AlwaysRetryReconnectPolicy {
 
         changeConnectionStatus(msg, "text-bg-warning");
         
-        return 5000;
+        return 2000;
     }
 }
 

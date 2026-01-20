@@ -2,7 +2,7 @@ public class VoteScaleModel
 {
     public const int MINIMAL_VOTE = 0;
     public const int LIMIT_BETWEEN_LOW_MEDIUM_VOTE = 12;
-    public const int LIMIT_BETWEEN_MEDIUM_HIGH_VOTE = 50;
+    public const int LIMIT_BETWEEN_MEDIUM_HIGH_VOTE = 60;
     public const string UNDECIDED_VOTE = "?";
     
     private Dictionary<EnumVoteScale, List<int>> _voteScaleByMinMax = new()
