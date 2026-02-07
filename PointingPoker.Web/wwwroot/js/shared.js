@@ -66,6 +66,14 @@ function addUser(user, areVotesBeingShowed) {
     }else{
         userVote = document.getElementById(userVoteId);
     }
+    
+    userListItem.addEventListener("dblclick", async function () {
+        const ok = confirm("Do you want to kick this user?");
+
+        if (ok) {
+            await connection.invoke("KickUserFromSession", user.connectionId);
+        }
+    });
 
     if (user.hasVoted) {
         if (areVotesBeingShowed) {
@@ -76,4 +84,10 @@ function addUser(user, areVotesBeingShowed) {
             userVote.textContent = "OK";
         }
     }
+}
+
+function getCsrfToken() {
+    return document.querySelector(
+        'input[name="__RequestVerificationToken"]'
+    ).value;
 }

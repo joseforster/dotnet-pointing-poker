@@ -166,6 +166,26 @@ connection.on("ClearVotesOnWatchSession", function () {
     watchSessionVotesCard.classList.add("text-secondary");
 })
 
+connection.on("KickedFromSession", async function () {
+    await fetch("/?handler=ExitSession", {
+        method: "POST",
+        headers: {
+            "RequestVerificationToken": getCsrfToken()
+        },
+        credentials: "include"
+    }).then(async () => {
+        
+        await exitSession();
+        
+        window.location.reload();
+    }).catch((error) => {
+        alert("Someone tried to kick you from session, but this error occurred: " + error.message);
+    });
+});
+
+connection.on("UserKickedFromSession", async function (userWhoKicked, userThatWasKicked) {
+    alert(`${userWhoKicked} kicked ${userThatWasKicked} from session.`);
+})
 
 connection.onclose(function () {
     changeConnectionStatus("disconnected", "text-bg-danger");

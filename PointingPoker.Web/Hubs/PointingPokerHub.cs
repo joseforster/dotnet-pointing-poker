@@ -45,7 +45,7 @@ public class PointingPokerHub : Hub
             await Clients.GroupExcept(sessionId, this.Context.ConnectionId)
                 .SendAsync("NewUserHasConnected", newUserModel);
 
-            Log.Information("{Username} has joined the session {SessionId}.",newUserModel.Username, sessionId);
+            Log.Information("{Username} has joined the session {SessionId}.", newUserModel.Username, sessionId);
         }
 
         await Groups.AddToGroupAsync(Context.ConnectionId, sessionId);
@@ -56,17 +56,18 @@ public class PointingPokerHub : Hub
         if (groupModel.AreVotesBeingShowed)
         {
             var voteModel = groupModel.GetVoteModel();
-            
+
             await Clients.All.SendAsync("SetVoteResult", voteModel);
             await Clients.Clients(groupModel.Watchers).SendAsync("SetVoteResultOnWatchSession", voteModel);
         }
-        
+
         LogSessionCount();
     }
 
     private static void LogSessionCount()
     {
-        Log.Information("Currently {GroupCount} sessions and {UsersCount} users.", _groupsBySession.Count, _groupsBySession.Values.Sum(s => s.Users.Count));
+        Log.Information("Currently {GroupCount} sessions and {UsersCount} users.", _groupsBySession.Count,
+            _groupsBySession.Values.Sum(s => s.Users.Count));
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
@@ -77,9 +78,9 @@ public class PointingPokerHub : Hub
     public async Task OnUserVoted(string userVote)
     {
         var sessionId = await GetCookieValue(EnumCustomClaimType.Session);
-        var guid =  await  GetCookieValue(EnumCustomClaimType.Guid);
-        
-        if (string.IsNullOrEmpty(sessionId) ||  string.IsNullOrEmpty(guid))
+        var guid = await GetCookieValue(EnumCustomClaimType.Guid);
+
+        if (string.IsNullOrEmpty(sessionId) || string.IsNullOrEmpty(guid))
         {
             return;
         }
@@ -95,8 +96,8 @@ public class PointingPokerHub : Hub
             await Clients.GroupExcept(sessionId, this.Context.ConnectionId)
                 .SendAsync("UserHasVotedWithShowedVotes", userModel);
 
-            var voteModel =  groupModel.GetVoteModel();
-            
+            var voteModel = groupModel.GetVoteModel();
+
             await Clients.Group(sessionId).SendAsync("SetVoteResult", voteModel);
             await Clients.Clients(groupModel.Watchers).SendAsync("SetVoteResultOnWatchSession", voteModel);
         }
@@ -149,13 +150,13 @@ public class PointingPokerHub : Hub
     public async Task ExitSession()
     {
         var sessionId = await GetCookieValue(EnumCustomClaimType.Session);
-        var guid = await  GetCookieValue(EnumCustomClaimType.Guid);
+        var guid = await GetCookieValue(EnumCustomClaimType.Guid);
 
         if (string.IsNullOrEmpty(sessionId) || string.IsNullOrEmpty(guid))
         {
             return;
         }
-        
+
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, sessionId);
 
         var groupModel = GetGroupModelBySession(sessionId);
@@ -166,7 +167,7 @@ public class PointingPokerHub : Hub
         {
             return;
         }
-        
+
         if (DoesSessionExist(sessionId))
         {
             groupModel.Users.Remove(userModel);
@@ -174,27 +175,28 @@ public class PointingPokerHub : Hub
             if (!groupModel.Users.Any())
             {
                 _groupsBySession.TryRemove(sessionId, out _);
-                
-                Log.Information("Session {SessionId} will be removed, {Username} was the last user.", sessionId, userModel.Username);
+
+                Log.Information("Session {SessionId} will be removed, {Username} was the last user.", sessionId,
+                    userModel.Username);
             }
             else
             {
                 if (groupModel.AreVotesBeingShowed)
                 {
                     var voteModel = groupModel.GetVoteModel();
-                    
-                    await Clients.GroupExcept(sessionId, this.Context.ConnectionId)
+
+                    await Clients.GroupExcept(sessionId, Context.ConnectionId)
                         .SendAsync("SetVoteResult", voteModel);
-                    
+
                     await Clients.Clients(groupModel.Watchers).SendAsync("SetVoteResultOnWatchSession", voteModel);
                 }
             }
         }
 
         await Clients.Group(sessionId).SendAsync("UserDisconnected", userModel);
-        
+
         Log.Information("User {Username} disconnected in session {SessionId}.", userModel.Username, sessionId);
-        
+
         LogSessionCount();
     }
 
@@ -215,22 +217,37 @@ public class PointingPokerHub : Hub
 
         if (currentSession == sessionToWatch)
         {
-            await Clients.Caller.SendAsync("SessionToWatchError", "Session to watch must be different from current session.");
+            await Clients.Caller.SendAsync("SessionToWatchError",
+                "Session to watch must be different from current session.");
             return;
         }
 
         RemoveWatcherFromOtherSessions();
 
         var groupModel = GetGroupModelBySession(sessionToWatch);
-        
+
         groupModel.Watchers.Add(Context.ConnectionId);
-        
+
         await Clients.Caller.SendAsync("SessionToWatchConnected", sessionToWatch);
 
         if (groupModel.AreVotesBeingShowed)
         {
             await Clients.Caller.SendAsync("SetVoteResultOnWatchSession", groupModel.GetVoteModel());
         }
+    }
+
+    public async Task KickUserFromSession(string connectionId)
+    {
+        var session = await GetCookieValue(EnumCustomClaimType.Session);
+        
+        var groupModel = GetGroupModelBySession(session);
+        
+        var userWhoKicked = groupModel.Users.Single(s => s.ConnectionId == Context.ConnectionId);
+        var userThatWasKicked = groupModel.Users.Single(s => s.ConnectionId == connectionId);
+        
+        await Clients.Client(connectionId).SendAsync("KickedFromSession");
+        
+        await Clients.AllExcept(connectionId, this.Context.ConnectionId).SendAsync("UserKickedFromSession",  userWhoKicked.Username, userThatWasKicked.Username);
     }
 
     private void RemoveWatcherFromOtherSessions()
@@ -253,12 +270,13 @@ public class PointingPokerHub : Hub
         if (claim == null)
         {
             await this.Context.GetHttpContext().SignOutAsync();
-            
-            Log.Information("Did not found cookie {Claim} on user {Username}.", enumCustomClaimType.ToString(), Context.User.Identity.Name);
-            
+
+            Log.Information("Did not found cookie {Claim} on user {Username}.", enumCustomClaimType.ToString(),
+                Context.User.Identity.Name);
+
             return string.Empty;
         }
-        
+
         return claim.Value;
     }
 

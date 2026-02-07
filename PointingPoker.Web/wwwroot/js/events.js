@@ -41,6 +41,6 @@ window.addEventListener("beforeunload", async () => {
     await connection.invoke("ExitSession");
 });
 
-function exitSession() {
-    connection.invoke("ExitSession");
+async function exitSession() {
+    await connection.invoke("ExitSession");
 }
