@@ -28,6 +28,15 @@ document.getElementById("clear-votes-button").addEventListener("click", async ()
     await connection.invoke("OnClearVotes");
 });
 
+document.getElementById("btn-watch-session").addEventListener("click", async () => {
+    let watchSessionInput = document.getElementById("input-watch-session-id");
+    
+    let watchSessionId = watchSessionInput.value;
+    await connection.invoke("AddWatcherToSession", watchSessionId);
+    
+    watchSessionInput.value = "";
+});
+
 window.addEventListener("beforeunload", async () => {
     await connection.invoke("ExitSession");
 });

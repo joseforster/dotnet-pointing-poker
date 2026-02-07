@@ -55,7 +55,10 @@ public class PointingPokerHub : Hub
 
         if (groupModel.AreVotesBeingShowed)
         {
-            await Clients.All.SendAsync("SetVoteResult", groupModel.GetVoteModel());
+            var voteModel = groupModel.GetVoteModel();
+            
+            await Clients.All.SendAsync("SetVoteResult", voteModel);
+            await Clients.Clients(groupModel.Watchers).SendAsync("SetVoteResultOnWatchSession", voteModel);
         }
         
         LogSessionCount();
@@ -92,7 +95,10 @@ public class PointingPokerHub : Hub
             await Clients.GroupExcept(sessionId, this.Context.ConnectionId)
                 .SendAsync("UserHasVotedWithShowedVotes", userModel);
 
-            await Clients.Group(sessionId).SendAsync("SetVoteResult", groupModel.GetVoteModel());
+            var voteModel =  groupModel.GetVoteModel();
+            
+            await Clients.Group(sessionId).SendAsync("SetVoteResult", voteModel);
+            await Clients.Clients(groupModel.Watchers).SendAsync("SetVoteResultOnWatchSession", voteModel);
         }
         else
         {
@@ -114,8 +120,11 @@ public class PointingPokerHub : Hub
 
         groupModel.AreVotesBeingShowed = true;
 
+        var voteModel = groupModel.GetVoteModel();
+
         await Clients.Group(sessionId).SendAsync("ShowVotes", groupModel.Users);
-        await Clients.Group(sessionId).SendAsync("SetVoteResult", groupModel.GetVoteModel());
+        await Clients.Group(sessionId).SendAsync("SetVoteResult", voteModel);
+        await Clients.Clients(groupModel.Watchers).SendAsync("SetVoteResultOnWatchSession", voteModel);
     }
 
     public async Task OnClearVotes()
@@ -134,6 +143,7 @@ public class PointingPokerHub : Hub
         groupModel.ClearVotes();
 
         await Clients.Group(sessionId).SendAsync("ClearVotes");
+        await Clients.Clients(groupModel.Watchers).SendAsync("ClearVotesOnWatchSession");
     }
 
     public async Task ExitSession()
@@ -171,8 +181,12 @@ public class PointingPokerHub : Hub
             {
                 if (groupModel.AreVotesBeingShowed)
                 {
+                    var voteModel = groupModel.GetVoteModel();
+                    
                     await Clients.GroupExcept(sessionId, this.Context.ConnectionId)
-                        .SendAsync("SetVoteResult", groupModel.GetVoteModel());
+                        .SendAsync("SetVoteResult", voteModel);
+                    
+                    await Clients.Clients(groupModel.Watchers).SendAsync("SetVoteResultOnWatchSession", voteModel);
                 }
             }
         }
@@ -187,6 +201,49 @@ public class PointingPokerHub : Hub
     public static bool DoesSessionExist(string sessionId)
     {
         return _groupsBySession.ContainsKey(sessionId);
+    }
+
+    public async Task AddWatcherToSession(string sessionToWatch)
+    {
+        if (!_groupsBySession.ContainsKey(sessionToWatch))
+        {
+            await Clients.Caller.SendAsync("SessionToWatchError", "No session found.");
+            return;
+        }
+
+        var currentSession = await GetCookieValue(EnumCustomClaimType.Session);
+
+        if (currentSession == sessionToWatch)
+        {
+            await Clients.Caller.SendAsync("SessionToWatchError", "Session to watch must be different from current session.");
+            return;
+        }
+
+        RemoveWatcherFromOtherSessions();
+
+        var groupModel = GetGroupModelBySession(sessionToWatch);
+        
+        groupModel.Watchers.Add(Context.ConnectionId);
+        
+        await Clients.Caller.SendAsync("SessionToWatchConnected", sessionToWatch);
+
+        if (groupModel.AreVotesBeingShowed)
+        {
+            await Clients.Caller.SendAsync("SetVoteResultOnWatchSession", groupModel.GetVoteModel());
+        }
+    }
+
+    private void RemoveWatcherFromOtherSessions()
+    {
+        var currentWatchingSessions = _groupsBySession.Where(wh => wh.Value.Watchers.Contains(Context.ConnectionId));
+
+        if (currentWatchingSessions.Any())
+        {
+            foreach (var session in currentWatchingSessions)
+            {
+                session.Value.Watchers.Remove(Context.ConnectionId);
+            }
+        }
     }
 
     private async Task<string> GetCookieValue(EnumCustomClaimType enumCustomClaimType)

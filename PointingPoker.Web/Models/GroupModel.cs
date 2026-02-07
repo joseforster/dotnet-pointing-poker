@@ -6,6 +6,8 @@ public class GroupModel
 
     public List<UserModel> Users { get; private set; } = new();
 
+    public List<string> Watchers { get; private set; } = new();
+
     public void Reset()
     {
         this.AreVotesBeingShowed = false;
