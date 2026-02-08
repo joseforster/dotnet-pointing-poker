@@ -9,18 +9,29 @@
 <div class="row">
     <div class="col-12 col-lg-6">
         <div class="row m-2">
-            <div class="col ps-0 pe-0">
-                <div id="watch-session-card" class="card text-bg-light text-secondary p-2">
-                    <div class="d-flex gap-2">
-                        <input id="input-watch-session-id" type="text" maxlength="4" class="form-control w-auto"
+            <div id="watch-session-card" class="col card text-bg-light text-secondary p-2">
+                <div class="row align-items-center g-2">
+                    <div class="col-12 col-sm-4">
+                        <input id="input-watch-session-id" type="text" maxlength="4" class="form-control w-100"
                                placeholder="session to watch"/>
-                        <button id="btn-watch-session" type="button" class="btn btn-outline-secondary w-auto">watch
+                    </div>
+                    <div class="col-12 col-sm-2">
+                        <button id="btn-watch-session" type="button" class="btn btn-outline-secondary w-100"> watch
                         </button>
-                        <div class="card w-25 d-flex justify-content-center text-bg-light text-secondary">
-                            <span class="text-center fw-bold p-1" id="watch-session-id">no session</span>
+                    </div>
+                    <div class="col-12 col-sm-6 d-flex gap-2 align-items-stretch" style="min-height: 38px;">
+                        <div
+                            class="card flex-fill text-bg-light text-secondary d-flex align-items-center justify-content-center">
+                            <span id="watch-session-id" class="fw-bold">
+                                no session
+                            </span>
                         </div>
-                        <div id="watch-session-votes-card" class="card w-25 d-flex justify-content-center text-bg-light text-secondary">
-                            <span class="text-center fw-bold p-1" id="watch-session-votes">no votes</span>
+                        <div
+                            class="card flex-fill text-bg-light text-secondary d-flex align-items-center justify-content-center"
+                            id="watch-session-votes-card">
+                            <span id="watch-session-votes" class="fw-bold">
+                                no votes
+                            </span>
                         </div>
                     </div>
                 </div>
