@@ -22,7 +22,8 @@ html {
 }
 
 body {
-  margin-bottom: 60px;
+  min-height: 90vh;
+  margin-bottom: 45px;
 }
 
 .form-floating>.form-control-plaintext::placeholder,
@@ -63,4 +64,10 @@ body {
   /* Make it bold */
   text-align: center;
   /* Center the text */
+}
+
+.hover-danger:hover {
+  border: 1px solid red;
+  cursor: pointer;
+  background-color: rgba(255, 0, 0, 0.05);
 }

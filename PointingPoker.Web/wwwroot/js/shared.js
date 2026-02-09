@@ -45,6 +45,7 @@ function addUser(user, areVotesBeingShowed) {
         userListItem.classList.add("d-flex");
         userListItem.classList.add("justify-content-between");
         userListItem.classList.add("align-items-center");
+        userListItem.classList.add("hover-danger");
         userListItem.setAttribute("name", "user-list-item");
         userListItem.id = userListItemId;
 
@@ -63,6 +64,15 @@ function addUser(user, areVotesBeingShowed) {
         userVote.id = userVoteId;
 
         userListItem.appendChild(userVote);
+
+        userListItem.addEventListener("click", async function () {
+            const ok = confirm("Do you want to kick this user?");
+
+            if (ok) {
+                await connection.invoke("KickUserFromSession", user.connectionId);
+            }
+        });
+        
     }else{
         userVote = document.getElementById(userVoteId);
     }
@@ -76,4 +86,10 @@ function addUser(user, areVotesBeingShowed) {
             userVote.textContent = "OK";
         }
     }
+}
+
+function getCsrfToken() {
+    return document.querySelector(
+        'input[name="__RequestVerificationToken"]'
+    ).value;
 }

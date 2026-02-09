@@ -127,6 +127,66 @@ connection.on("UserHasReconnected", function (oldConnectionId, newConnectionId) 
     userVote.id = "user-vote-" + newConnectionId;
 });
 
+connection.on("SessionToWatchError", function (error) {
+    alert(error);
+})
+
+connection.on("SessionToWatchConnected", function (sessionId) {
+    let watchSessionId = document.getElementById("watch-session-id");
+    watchSessionId.textContent = `session ${sessionId}`;
+    
+    let watchSessionVotes = document.getElementById("watch-session-votes");
+    watchSessionVotes.textContent = "waiting";
+});
+
+connection.on("SetVoteResultOnWatchSession", function (voteModel) {
+    let watchSessionVotes = document.getElementById("watch-session-votes");
+
+    if (voteModel.voteResult == "") {
+        return;
+    }
+
+    watchSessionVotes.textContent = voteModel.voteResult;
+
+    let watchSessionVotesCard = document.getElementById("watch-session-votes-card");
+
+    watchSessionVotesCard.classList.remove(...classList);
+
+    let newClass = mapVoteScaleByClass.get(voteModel.voteScale);
+    watchSessionVotesCard.classList.add(newClass);
+});
+
+connection.on("ClearVotesOnWatchSession", function () {
+    let watchSessionVotes = document.getElementById("watch-session-votes");
+    watchSessionVotes.textContent = "waiting";
+
+    let watchSessionVotesCard = document.getElementById("watch-session-votes-card");
+    watchSessionVotesCard.classList.remove(...classList);
+    watchSessionVotesCard.classList.add("text-bg-light");
+    watchSessionVotesCard.classList.add("text-secondary");
+})
+
+connection.on("KickedFromSession", async function () {
+    await fetch("/?handler=ExitSession", {
+        method: "POST",
+        headers: {
+            "RequestVerificationToken": getCsrfToken()
+        },
+        credentials: "include"
+    }).then(async () => {
+        
+        await exitSession();
+        
+        window.location.reload();
+    }).catch((error) => {
+        alert("Someone tried to kick you from session, but this error occurred: " + error.message);
+    });
+});
+
+connection.on("UserKickedFromSession", async function (userWhoKicked, userThatWasKicked) {
+    alert(`${userWhoKicked} kicked ${userThatWasKicked} from session.`);
+})
+
 connection.onclose(function () {
     changeConnectionStatus("disconnected", "text-bg-danger");
 });

@@ -50,7 +50,7 @@ try
 
     app.UseCookiePolicy(cookiePolicyOptions);
 
-// Configure the HTTP request pipeline.
+    // Configure the HTTP request pipeline.
     if (!app.Environment.IsDevelopment())
     {
         app.UseExceptionHandler("/Error");
@@ -78,7 +78,7 @@ try
 }
 catch (Exception ex)
 {
-    Log.Fatal(ex, "An unhandled exception occurred during bootstrapping");
+    Log.Fatal(ex, "An unhandled exception occurred during startup.");
 }
 finally
 {
