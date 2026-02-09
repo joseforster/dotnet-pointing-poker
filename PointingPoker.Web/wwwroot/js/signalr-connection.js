@@ -102,6 +102,7 @@ connection.on("ClearVotes", function () {
 
     userVoteList.forEach(userVote => {
         userVote.classList.remove(...classList);
+        userVote.textContent = ""
     });
 
     let myVoteSpan = document.getElementById("my-vote");
