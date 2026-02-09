@@ -65,3 +65,9 @@ body {
   text-align: center;
   /* Center the text */
 }
+
+.hover-danger:hover {
+  border: 1px solid red;
+  cursor: pointer;
+  background-color: rgba(255, 0, 0, 0.05);
+}
