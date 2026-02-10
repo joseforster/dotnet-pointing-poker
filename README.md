@@ -1,6 +1,6 @@
 # Pointing Poker
 
-A simple planning poker web app for agile teams. UI built with Razor Pages and Bootstrap, real-time communication with SignalR, logging with Serilog, and authentication via Google OAuth.
+A simple planning poker web app for agile teams, featuring real-time voting, secure authentication, and session management.
 
 🔗 Live demo: https://pointingpoker.joseforster.com
 
@@ -8,27 +8,30 @@ A simple planning poker web app for agile teams. UI built with Razor Pages and B
 
 ## 🚀 Features
 
-- Real-time communication using SignalR  
+- Real-time estimation with live updates
 - Create and join sessions
-- Select estimated hours and reveal results
-- Authentication via Google OAuth 
+- Reveal results simultaneously
+- Watch secondary sessions (e.g., QA voting)
+- Kick unwanted users
+- Secure authentication
 
 ---
 
 ## 🖼️ Preview
 
-<img width="1920" height="1200" alt="Screenshot from 2025-12-21 11-31-43" src="https://github.com/user-attachments/assets/12db0a65-c911-4ee7-8248-fcd0b0cfee0b" />
-<img width="1920" height="1200" alt="Screenshot from 2025-12-22 17-21-49" src="https://github.com/user-attachments/assets/8fa9483e-4afe-4afe-8146-f81c92c7e039" />
+<img width="1913" height="929" alt="Screenshot from 2026-02-10 19-01-10" src="https://github.com/user-attachments/assets/c2db35e7-08ed-4c03-90fd-9bafdf15d008" />
+<img width="1913" height="929" alt="Screenshot from 2026-02-10 19-05-05" src="https://github.com/user-attachments/assets/0a991f70-cfbb-47a7-936a-9ef2966fdc58" />
+<img width="1913" height="929" alt="Screenshot from 2026-02-10 19-08-25" src="https://github.com/user-attachments/assets/99304bac-3358-4059-a55c-0499e58a0d20" />
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Backend:** ASP.NET Core (SignalR for real-time communication)  
-- **Frontend:** Razor, Bootstrap 5  
-- **Language:** C#  
-- **Hosting:** Self-hosted (Docker, Cloudflare Tunnel)  
-- **Security:** Google OAuth
+- **Backend:** ASP.NET Core, SignalR  
+- **Frontend:** Razor Pages, Bootstrap 5  
+- **Hosting:** Docker, Cloudflare Tunnel  
+- **Authentication:** Google OAuth, Cloudflare OTP
+- **Authorization:** ASP.NET Core Cookie Authentication
 - **Logging:** Serilog
 
 ---
