@@ -46,6 +46,7 @@ function addUser(user, areVotesBeingShowed) {
         userListItem.classList.add("justify-content-between");
         userListItem.classList.add("align-items-center");
         userListItem.classList.add("hover-danger");
+        userListItem.classList.add("big-line-height");
         userListItem.setAttribute("name", "user-list-item");
         userListItem.id = userListItemId;
 

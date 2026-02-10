@@ -106,7 +106,7 @@ connection.on("ClearVotes", function () {
     });
 
     let myVoteSpan = document.getElementById("my-vote");
-    myVoteSpan.textContent = "--";
+    myVoteSpan.textContent = "";
     myVoteSpan.classList.remove(...classList);
     myVoteSpan.classList.add("text-secondary");
 
