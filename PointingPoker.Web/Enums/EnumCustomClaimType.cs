@@ -5,4 +5,5 @@ public enum EnumCustomClaimType
     Session,
     Guid,
     Email,
+    Custom,
 }

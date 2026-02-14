@@ -1,10 +1,12 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using PointingPoker.Enums;
+using PointingPoker.Models;
 
 public class LoginModel : PageModel
 {
@@ -26,20 +28,23 @@ public class LoginModel : PageModel
             this.Username = _unknowName;
             return;
         }
+        
+        var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(jwtCookie);
 
-        var jwtHandler = new JwtSecurityTokenHandler();
-
-        var jwtToken = jwtHandler.ReadJwtToken(jwtCookie);
-
-        var email = jwtToken.Claims.FirstOrDefault(c => c.Type == EnumCustomClaimType.Email.ToString().ToLower())?.Value;
-
-        if (string.IsNullOrEmpty(email))
+        var username = jwtToken.Claims.FirstOrDefault(f => f.Type == nameof(EnumCustomClaimType.Custom).ToLower())?.Value;
+        
+        if (string.IsNullOrEmpty(username))
         {
-            this.Username = _unknowName;
+            var email = jwtToken.Claims.FirstOrDefault(c => c.Type == nameof(EnumCustomClaimType.Email).ToLower())?.Value;
+
+            this.Username = !string.IsNullOrEmpty(email) ? email.Split('@')[0] : _unknowName;
+
             return;
         }
         
-        this.Username = email.Split('@')[0];
+        var authModel = JsonSerializer.Deserialize<AuthModel>(username!);
+
+        this.Username = authModel.Name;
     }
 
     public async Task<IActionResult> OnPostJoinSession([FromForm] string session, string username)
