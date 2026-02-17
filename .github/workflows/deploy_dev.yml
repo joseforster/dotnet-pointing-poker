@@ -40,7 +40,9 @@ jobs:
           context: .
           file: ./PointingPoker.Web/Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: |
+            ${{ steps.meta.outputs.tags }}
+            ${{ vars.DOCKER_HUB_NAMESPACE }}/${{ vars.DOCKER_HUB_REPOSITORY_NAME }}:latest
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Generate artifact attestation
