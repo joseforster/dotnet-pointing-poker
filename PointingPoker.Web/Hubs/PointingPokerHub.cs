@@ -157,11 +157,20 @@ public class PointingPokerHub : Hub
             return;
         }
 
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, sessionId);
+        var connectionId = Context.ConnectionId;
 
         var groupModel = GetGroupModelBySession(sessionId);
 
         var userModel = groupModel.GetUserModelByGuid(guid);
+
+        await RemoveUserFromSession(connectionId, sessionId, userModel);
+    }
+
+    private async Task RemoveUserFromSession(string connectionId, string sessionId, UserModel userModel)
+    {
+        var groupModel = GetGroupModelBySession(sessionId);
+        
+        await Groups.RemoveFromGroupAsync(connectionId, sessionId);
 
         if (userModel == null)
         {
@@ -185,7 +194,7 @@ public class PointingPokerHub : Hub
                 {
                     var voteModel = groupModel.GetVoteModel();
 
-                    await Clients.GroupExcept(sessionId, Context.ConnectionId)
+                    await Clients.GroupExcept(sessionId, connectionId)
                         .SendAsync("SetVoteResult", voteModel);
 
                     await Clients.Clients(groupModel.Watchers).SendAsync("SetVoteResultOnWatchSession", voteModel);
@@ -244,6 +253,8 @@ public class PointingPokerHub : Hub
         
         var userWhoKicked = groupModel.Users.Single(s => s.ConnectionId == Context.ConnectionId);
         var userThatWasKicked = groupModel.Users.Single(s => s.ConnectionId == connectionId);
+        
+        await RemoveUserFromSession(connectionId, session, userThatWasKicked);
         
         await Clients.Client(connectionId).SendAsync("KickedFromSession");
         
