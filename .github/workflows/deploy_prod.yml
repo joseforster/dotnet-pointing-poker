@@ -1,4 +1,4 @@
-name: Publish Docker Image To Production Hub
+name: Deploy To Prod
 
 on:
   push:
@@ -8,6 +8,9 @@ on:
   workflow_dispatch: 
 
 jobs:
+  build:
+    uses: ./.github/workflows/dotnet.yml
+  
   push_to_registry:
     environment: production
     name: Push Docker image to Docker Hub

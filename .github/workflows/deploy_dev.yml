@@ -1,13 +1,12 @@
-name: Publish Docker Image To Development Hub
+name: Deploy To Dev
 
 on:
-  push:
-    branches-ignore:  [ "master" ]
-  pull_request:
-    branches-ignore:  [ "master" ]
   workflow_dispatch: 
 
 jobs:
+  build:
+    uses: ./.github/workflows/dotnet.yml
+
   push_to_registry:
     environment: development
     name: Push Docker image to Docker Hub
@@ -40,9 +39,7 @@ jobs:
           context: .
           file: ./PointingPoker.Web/Dockerfile
           push: true
-          tags: |
-            ${{ steps.meta.outputs.tags }}
-            ${{ vars.DOCKER_HUB_NAMESPACE }}/${{ vars.DOCKER_HUB_REPOSITORY_NAME }}:latest
+          tags: ${{ vars.DOCKER_HUB_NAMESPACE }}/${{ vars.DOCKER_HUB_REPOSITORY_NAME }}:latest
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Generate artifact attestation
@@ -51,4 +48,3 @@ jobs:
           subject-name: index.docker.io/${{vars.DOCKER_HUB_NAMESPACE}}/${{vars.DOCKER_HUB_REPOSITORY_NAME}}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
-          
