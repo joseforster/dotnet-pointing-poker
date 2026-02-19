@@ -4,6 +4,12 @@
 name: Build And Tests
 
 on:
+  push: 
+    branches-ignore:
+      - "master"
+  pull_request: 
+    branches:
+      - "master"
   workflow_call:
 
 jobs:
