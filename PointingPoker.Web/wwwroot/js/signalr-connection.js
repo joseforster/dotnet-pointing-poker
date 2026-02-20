@@ -175,9 +175,6 @@ connection.on("KickedFromSession", async function () {
         },
         credentials: "include"
     }).then(async () => {
-        
-        await exitSession();
-        
         window.location.reload();
     }).catch((error) => {
         alert("Someone tried to kick you from session, but this error occurred: " + error.message);
