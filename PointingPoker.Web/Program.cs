@@ -37,7 +37,7 @@ try
         {
             options.Cookie.Name = "PointingPokerAuth";
             options.LoginPath = "/Login";
-            options.ExpireTimeSpan = TimeSpan.FromHours(8);
+            options.ExpireTimeSpan = TimeSpan.FromHours(12);
             options.SlidingExpiration = true;
         });
 
