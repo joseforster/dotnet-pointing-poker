@@ -183,6 +183,8 @@ connection.on("KickedFromSession", async function () {
 
 connection.on("UserKickedFromSession", async function (userWhoKicked, userThatWasKicked) {
     alert(`${userWhoKicked} kicked ${userThatWasKicked} from session.`);
+
+    window.location.reload();
 })
 
 connection.onclose(function () {

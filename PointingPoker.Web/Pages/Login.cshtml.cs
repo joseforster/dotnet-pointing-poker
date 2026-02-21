@@ -49,6 +49,8 @@ public class LoginModel : PageModel
 
     public async Task<IActionResult> OnPostJoinSession([FromForm] string session, string username)
     {
+        this.Username = username;
+        
         if (string.IsNullOrEmpty(session))
         {
             Erro = $"Session is required.";
@@ -61,11 +63,13 @@ public class LoginModel : PageModel
             return Page();
         }
 
-        return await SignInUser(session, username);
+        return await SignInUser(session);
     }
 
     public async Task<IActionResult> OnPostCreateSession([FromForm] string session, string username)
     {
+        this.Username = username;
+        
         session = new Random().Next(MIN_SESSION_NUMBER, MAX_SESSION_NUMBER).ToString();
 
         while (PointingPokerHub.DoesSessionExist(session))
@@ -73,14 +77,14 @@ public class LoginModel : PageModel
             session = new Random().Next(MIN_SESSION_NUMBER, MAX_SESSION_NUMBER).ToString();
         }
 
-        return await SignInUser(session, username);
+        return await SignInUser(session);
     }
 
-    private async Task<IActionResult> SignInUser(string session, string username)
+    private async Task<IActionResult> SignInUser(string session)
     {
         var claims = new List<Claim>
         {
-            new(ClaimTypes.Name, username),
+            new(ClaimTypes.Name, this.Username),
             new(nameof(EnumCustomClaimType.Session), session),
             new(nameof(EnumCustomClaimType.Guid), Guid.NewGuid().ToString()),
         };
