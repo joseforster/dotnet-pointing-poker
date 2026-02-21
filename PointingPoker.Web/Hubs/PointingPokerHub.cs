@@ -259,6 +259,8 @@ public class PointingPokerHub : Hub
         await Clients.Client(connectionId).SendAsync("KickedFromSession");
         
         await Clients.AllExcept(connectionId, this.Context.ConnectionId).SendAsync("UserKickedFromSession",  userWhoKicked.Username, userThatWasKicked.Username);
+        
+        await OnClearVotes();
     }
 
     private void RemoveWatcherFromOtherSessions()
