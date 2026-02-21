@@ -67,10 +67,15 @@ function addUser(user, areVotesBeingShowed) {
         userListItem.appendChild(userVote);
 
         userListItem.addEventListener("click", async function () {
-            const ok = confirm("Do you want to kick this user?");
+            const ok = confirm("Do you want to kick this user?\nAll votes will be cleared.");
 
             if (ok) {
-                await connection.invoke("KickUserFromSession", user.connectionId);
+                await connection.invoke("KickUserFromSession", user.connectionId)
+                .then(() => {
+                    window.location.reload();
+                }).catch((e) => {
+                    alert("Failed to kick this user: " + e.message);
+                });
             }
         });
         
