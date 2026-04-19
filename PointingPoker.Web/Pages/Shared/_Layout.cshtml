@@ -1,10 +1,19 @@
 ﻿@using System.Diagnostics
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
 
 <head>
     <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0"/>
+    <meta name="description" content="Real-time planning poker for agile teams. Create sessions, vote on story points, and reveal results simultaneously.">
+    <meta name="theme-color" content="#198754">
+    <meta name="color-scheme" content="light dark">
+
+    <!-- Open Graph tags for social sharing -->
+    <meta property="og:title" content="Pointing Poker">
+    <meta property="og:description" content="Real-time agile planning poker for distributed teams">
+    <meta property="og:type" content="website">
+
     <title>@ViewData["Title"]</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/PointingPoker.styles.css" asp-append-version="true"/>
@@ -14,6 +23,9 @@
 </head>
 
 <body>
+<!-- Skip to content link for accessibility -->
+<a href="#main-content" class="visually-hidden-focusable btn btn-primary position-absolute top-0 start-0 m-2" style="z-index: 9999;">Skip to main content</a>
+
 <header>
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
         <div class="container">
@@ -37,27 +49,33 @@
 </header>
 
 <div class="container">
-    <main role="main" class="pb-3">
+    <main id="main-content" role="main" class="pb-3" tabindex="-1">
         @RenderBody()
     </main>
 </div>
 
 <footer class="border-top footer text-muted">
-    <div class="container d-flex justify-content-between">
-        <span>
-            &copy; @DateTime.Now.Year - <strong>PointingPoker</strong> - @FileVersionInfo.GetVersionInfo(GetType().Assembly.Location).FileVersion - BETA
-        </span>
-        <div class="d-flex gap-2">
-            <a href="https://github.com/joseforster/dotnet-pointing-poker" target="_blank">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-2">
+            <span>
+                &copy; @DateTime.Now.Year - <strong>PointingPoker</strong>
+            </span>
+            <span class="badge bg-secondary">v@(FileVersionInfo.GetVersionInfo(GetType().Assembly.Location).FileVersion)</span>
+            <span class="badge bg-info text-dark">BETA</span>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <a href="https://github.com/joseforster/dotnet-pointing-poker" target="_blank"
+               rel="noopener noreferrer"
+               aria-label="View source code on GitHub"
+               class="text-decoration-none">
                 <img src="~/img/github.png" alt="GitHub" width="32" height="32"/>
             </a>
         </div>
-        
     </div>
 </footer>
 
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
-<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/lib/jquery/dist/jquery.min.js" defer></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js" defer></script>
 
 </body>
 </html>

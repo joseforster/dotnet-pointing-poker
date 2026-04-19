@@ -111,7 +111,7 @@ connection.on("ClearVotes", function () {
     myVoteSpan.classList.add("text-secondary");
 
     let voteResult = document.getElementById("vote-result");
-    voteResult.textContent = "waiting";
+    voteResult.textContent = "waiting for votes";
 
     let voteCard = document.getElementById("vote-card");
     voteCard.classList.remove(...classList);
@@ -129,17 +129,21 @@ connection.on("UserHasReconnected", function (oldConnectionId, newConnectionId) 
 });
 
 connection.on("SessionToWatchError", function (error) {
-    alert(error);
+    showToast(error);
 })
 
 connection.on("SessionToWatchConnected", function (sessionId) {
     let watchSessionId = document.getElementById("watch-session-id");
     watchSessionId.textContent = `session ${sessionId}`;
-    
+
     let watchSessionVotes = document.getElementById("watch-session-votes");
     watchSessionVotes.textContent = "waiting";
-});
 
+    document.getElementById("watch-input-col").classList.replace("col-sm-6", "col-sm-3");
+    document.getElementById("watch-btn-col").classList.replace("col-sm-6", "col-sm-3");
+
+    document.getElementById("watch-session-info").classList.remove("d-none");
+});
 connection.on("SetVoteResultOnWatchSession", function (voteModel) {
     let watchSessionVotes = document.getElementById("watch-session-votes");
 
@@ -167,6 +171,11 @@ connection.on("ClearVotesOnWatchSession", function () {
     watchSessionVotesCard.classList.add("text-secondary");
 })
 
+connection.on("RateLimitExceeded", async function (message) {
+
+    showToast(message, "Rate limit exceeded");
+});
+
 connection.on("KickedFromSession", async function () {
     await fetch("/?handler=ExitSession", {
         method: "POST",
@@ -177,14 +186,14 @@ connection.on("KickedFromSession", async function () {
     }).then(async () => {
         window.location.reload();
     }).catch((error) => {
-        alert("Someone tried to kick you from session, but this error occurred: " + error.message);
+        showToast(error.message, "Someone tried to kick you from session");
     });
 });
 
 connection.on("UserKickedFromSession", async function (userWhoKicked, userThatWasKicked) {
+    showToast(`${userWhoKicked} kicked ${userThatWasKicked} from session.`);
+
     window.location.reload();
-    
-    alert(`${userWhoKicked} kicked ${userThatWasKicked} from session.`);
 })
 
 connection.onclose(function () {

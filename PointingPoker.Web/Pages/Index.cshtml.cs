@@ -16,8 +16,8 @@ public class IndexModel : PageModel
 
     public void OnGet()
     {
-        this.Username = User.Identity.Name;
-        this.SessionId = User.FindFirstValue(nameof(EnumCustomClaimType.Session));
+        Username = User.Identity.Name;
+        SessionId = User.FindFirstValue(nameof(EnumCustomClaimType.Session));
     }
     
     public async Task<IActionResult> OnPostExitSession()

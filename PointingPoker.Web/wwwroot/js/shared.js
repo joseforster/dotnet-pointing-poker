@@ -74,7 +74,7 @@ function addUser(user, areVotesBeingShowed) {
                 .then(() => {
                     window.location.reload();
                 }).catch((e) => {
-                    alert("Failed to kick this user: " + e.message);
+                    showToast(e.message, "Failed to kick this user");
                 });
             }
         });
@@ -98,4 +98,19 @@ function getCsrfToken() {
     return document.querySelector(
         'input[name="__RequestVerificationToken"]'
     ).value;
+}
+
+function showToast(message, title = "Notification") {
+    let toastEl = document.getElementById('appToast');
+    let toastMessage = document.getElementById('toastMessage');
+    let toastTitle = document.getElementById('toastTitle');
+
+    toastMessage.textContent = message;
+    toastTitle.textContent = title;
+
+    let toast = new bootstrap.Toast(toastEl, {
+        delay: 3000 // auto-hide after 3s
+    });
+
+    toast.show();
 }

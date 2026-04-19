@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.SignalR;
+using PointingPoker.Hubs;
 using Serilog;
-using Serilog.Templates;
-using Serilog.Templates.Themes;
 
 Log.Logger = new LoggerConfiguration()
-    .WriteTo.Console()
+    .MinimumLevel.Warning()
+    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
     .CreateBootstrapLogger();
 
 Log.Information("Starting up!");
@@ -16,10 +17,7 @@ try
     builder.Services.AddSerilog((services, lc) => lc
         .ReadFrom.Configuration(builder.Configuration)
         .ReadFrom.Services(services)
-        .Enrich.FromLogContext()
-        .WriteTo.Console(new ExpressionTemplate(
-            "[{@t:HH:mm:ss} {@l:u3}{#if @tr is not null} ({substring(@tr,0,4)}:{substring(@sp,0,4)}){#end}] {@m}\n{@x}",
-            theme: TemplateTheme.Code)));
+        .Enrich.FromLogContext());
 
 // Add services to the container.
     builder.Services.AddRazorPages();
@@ -29,7 +27,12 @@ try
         {
             s.EnableDetailedErrors = true;
         }
+
+        s.AddFilter<RateLimitFilter>();
     });
+
+    // Add background services
+    builder.Services.AddHostedService<PointingPoker.Services.SessionCleanupService>();
 
     builder.Services
         .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -60,8 +63,6 @@ try
 
     app.UseHttpsRedirection();
 
-    app.UseSerilogRequestLogging();
-
     app.UseRouting();
 
     app.UseAuthentication();
@@ -73,7 +74,7 @@ try
     app.MapHub<PointingPokerHub>("/pointingpokerhub");
 
     await app.RunAsync();
-    
+
     Log.Information("Stopped cleanly");
 }
 catch (Exception ex)

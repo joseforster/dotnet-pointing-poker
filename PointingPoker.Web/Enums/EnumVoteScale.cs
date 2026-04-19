@@ -1,3 +1,5 @@
+namespace PointingPoker.Enums;
+
 public enum EnumVoteScale
 {
     Empty,

@@ -5,33 +5,29 @@
 }
 
 @Html.AntiForgeryToken()
+@Html.Partial("Shared/ToastNotification")
 
 <div class="row">
     <div class="col-12 col-lg-6">
         <div class="row m-2">
             <div id="watch-session-card" class="col card text-bg-light text-secondary p-2">
                 <div class="row align-items-center g-2">
-                    <div class="col-12 col-sm-4">
+                    <div class="col-12 col-sm-6" id="watch-input-col">
                         <input id="input-watch-session-id" type="text" maxlength="4" class="form-control w-100"
                                placeholder="session to watch"/>
                     </div>
-                    <div class="col-12 col-sm-2">
-                        <button id="btn-watch-session" type="button" class="btn btn-outline-secondary w-100"> watch
+                    <div class="col-12 col-sm-6" id="watch-btn-col">
+                        <button id="btn-watch-session" type="button" class="btn btn-outline-secondary w-100">watch
                         </button>
                     </div>
-                    <div class="col-12 col-sm-6 d-flex gap-2 align-items-stretch" style="min-height: 38px;">
-                        <div
-                            class="card flex-fill text-bg-light text-secondary d-flex align-items-center justify-content-center">
-                            <span id="watch-session-id" class="fw-bold">
-                                no session
-                            </span>
+                    <div class="col-12 col-sm-6 d-flex gap-2 align-items-stretch d-none" style="min-height: 38px;"
+                         id="watch-session-info">
+                        <div class="card flex-fill text-bg-light text-secondary d-flex align-items-center justify-content-center">
+                            <span id="watch-session-id" class="fw-bold"></span>
                         </div>
-                        <div
-                            class="card flex-fill text-bg-light text-secondary d-flex align-items-center justify-content-center"
-                            id="watch-session-votes-card">
-                            <span id="watch-session-votes" class="fw-bold">
-                                no votes
-                            </span>
+                        <div class="card flex-fill text-bg-light text-secondary d-flex align-items-center justify-content-center"
+                             id="watch-session-votes-card">
+                            <span id="watch-session-votes" class="fw-bold"></span>
                         </div>
                     </div>
                 </div>
@@ -43,64 +39,113 @@
                     session: @Model.SessionId
                 </div>
                 <div class="card-body">
-                    <p id="vote-result" class="card-text p-5">waiting</p>
+                    <p id="vote-result" class="card-text p-5">
+                        waiting for votes
+                    </p>
                 </div>
             </div>
         </div>
+
         <div class="row m-2">
             <div class="col ps-0 pe-1">
-                <button type="button" id="show-votes-button" class="btn btn-outline-primary py-3 w-100">Show Votes
+                <button type="button" id="show-votes-button" class="btn btn-outline-primary py-3 w-100"
+                        aria-label="Show all votes">
+                    Show Votes
                 </button>
             </div>
             <div class="col ps-1 pe-0">
-                <button type="button" id="clear-votes-button" class="btn btn-outline-secondary py-3 w-100">Clear Votes
+                <button type="button" id="clear-votes-button" class="btn btn-outline-secondary py-3 w-100"
+                        aria-label="Clear all votes">
+                    Clear Votes
                 </button>
             </div>
         </div>
-        <div class="d-flex gap-2 m-2">
-            <button type="button" name="green-vote-button" class="btn btn-success w-100 p-3">0.5</button>
-            <button type="button" name="green-vote-button" class="btn btn-success w-100">1</button>
-            <button type="button" name="green-vote-button" class="btn btn-success w-100">2</button>
-        </div>
-        <div class="d-flex gap-2 m-2">
-            <button type="button" name="green-vote-button" class="btn btn-success w-100 p-3">3</button>
-            <button type="button" name="green-vote-button" class="btn btn-success w-100">4</button>
-            <button type="button" name="green-vote-button" class="btn btn-success w-100">5</button>
-        </div>
-        <div class="d-flex gap-2 m-2">
-            <button type="button" name="green-vote-button" class="btn btn-success w-100 p-3">6</button>
-            <button type="button" name="green-vote-button" class="btn btn-success w-100">7</button>
-            <button type="button" name="green-vote-button" class="btn btn-success w-100">8</button>
-        </div>
-        <div class="d-flex gap-2 m-2">
-            <button type="button" name="yellow-vote-button" class="btn btn-warning w-100 p-3">12</button>
-            <button type="button" name="yellow-vote-button" class="btn btn-warning w-100 ">16</button>
-            <button type="button" name="yellow-vote-button" class="btn btn-warning w-100 ">20</button>
 
-        </div>
+        <!-- Voting Buttons with consistent sizing and ARIA labels -->
         <div class="d-flex gap-2 m-2">
-            <button type="button" name="yellow-vote-button" class="btn btn-warning w-100 p-3">24</button>
-            <button type="button" name="yellow-vote-button" class="btn btn-warning w-100 ">32</button>
-            <button type="button" name="yellow-vote-button" class="btn btn-warning w-100">40</button>
-        </div>
-        <div class="d-flex gap-2 m-2">
-            <button type="button" name="red-vote-button" class="btn btn-danger w-100 p-3 ">60</button>
-            <button type="button" name="red-vote-button" class="btn btn-danger w-100 ">80</button>
-            <button type="button" name="red-vote-button" class="btn btn-danger w-100 ">100</button>
-        </div>
-        <div class="d-flex gap-2 m-2">
-            <button type="button" id="empty-vote-button" class="btn btn-outline-dark p-3 w-100">I have no idea what
-                you guys are talking
-                about.
+            <button type="button" name="green-vote-button" class="btn btn-success w-100 py-3 vote-btn"
+                    aria-label="Vote 0.5 story points">0.5
+            </button>
+            <button type="button" name="green-vote-button" class="btn btn-success w-100 py-3 vote-btn"
+                    aria-label="Vote 1 story point">1
+            </button>
+            <button type="button" name="green-vote-button" class="btn btn-success w-100 py-3 vote-btn"
+                    aria-label="Vote 2 story points">2
             </button>
         </div>
+        <div class="d-flex gap-2 m-2">
+            <button type="button" name="green-vote-button" class="btn btn-success w-100 py-3 vote-btn"
+                    aria-label="Vote 3 story points">3
+            </button>
+            <button type="button" name="green-vote-button" class="btn btn-success w-100 py-3 vote-btn"
+                    aria-label="Vote 4 story points">4
+            </button>
+            <button type="button" name="green-vote-button" class="btn btn-success w-100 py-3 vote-btn"
+                    aria-label="Vote 5 story points">5
+            </button>
+        </div>
+        <div class="d-flex gap-2 m-2">
+            <button type="button" name="green-vote-button" class="btn btn-success w-100 py-3 vote-btn"
+                    aria-label="Vote 6 story points">6
+            </button>
+            <button type="button" name="green-vote-button" class="btn btn-success w-100 py-3 vote-btn"
+                    aria-label="Vote 7 story points">7
+            </button>
+            <button type="button" name="green-vote-button" class="btn btn-success w-100 py-3 vote-btn"
+                    aria-label="Vote 8 story points">8
+            </button>
+        </div>
+        <div class="d-flex gap-2 m-2">
+            <button type="button" name="yellow-vote-button" class="btn btn-warning w-100 py-3 vote-btn"
+                    aria-label="Vote 12 story points">12
+            </button>
+            <button type="button" name="yellow-vote-button" class="btn btn-warning w-100 py-3 vote-btn"
+                    aria-label="Vote 16 story points">16
+            </button>
+            <button type="button" name="yellow-vote-button" class="btn btn-warning w-100 py-3 vote-btn"
+                    aria-label="Vote 20 story points">20
+            </button>
+        </div>
+        <div class="d-flex gap-2 m-2">
+            <button type="button" name="yellow-vote-button" class="btn btn-warning w-100 py-3 vote-btn"
+                    aria-label="Vote 24 story points">24
+            </button>
+            <button type="button" name="yellow-vote-button" class="btn btn-warning w-100 py-3 vote-btn"
+                    aria-label="Vote 32 story points">32
+            </button>
+            <button type="button" name="yellow-vote-button" class="btn btn-warning w-100 py-3 vote-btn"
+                    aria-label="Vote 40 story points">40
+            </button>
+        </div>
+        <div class="d-flex gap-2 m-2">
+            <button type="button" name="red-vote-button" class="btn btn-danger w-100 py-3 vote-btn"
+                    aria-label="Vote 60 story points">60
+            </button>
+            <button type="button" name="red-vote-button" class="btn btn-danger w-100 py-3 vote-btn"
+                    aria-label="Vote 80 story points">80
+            </button>
+            <button type="button" name="red-vote-button" class="btn btn-danger w-100 py-3 vote-btn"
+                    aria-label="Vote 100 story points">100
+            </button>
+        </div>
+        <div class="d-flex gap-2 m-2">
+            <button type="button" id="empty-vote-button" class="btn btn-outline-dark py-3 w-100"
+                    title="Pass - I don't know or need more info" aria-label="Pass vote">
+                I have no idea what you guys are talking about.
+            </button>
+        </div>
+
+
     </div>
     <div class="col-12 col-lg-6">
+
         <div id="users" class="row m-2">
             <ul class="list-group w-100" id="user-list">
-                <li class="list-group-item d-flex justify-content-between align-items-center big-line-height">
-                    <strong id="my-username">@Model.Username</strong>
-                    <span id="my-vote" class="badge big-badge text-secondary"></span>
+                <li class="list-group-item d-flex justify-content-between align-items-center big-line-height bg-light">
+                    <strong id="my-username">
+                        @Model.Username
+                    </strong>
+                    <span id="my-vote" class="badge big-badge text-secondary" aria-label="My vote status"></span>
                 </li>
             </ul>
         </div>
