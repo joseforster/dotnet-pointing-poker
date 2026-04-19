@@ -70,3 +70,67 @@ body {
 .big-line-height{
   line-height: 3;
 }
+
+/* Responsive vote buttons for better mobile touch targets */
+@media (max-width: 576px) {
+  .vote-btn {
+    font-size: 1.1rem;
+    font-weight: 600;
+    min-height: 48px;
+    min-width: 48px;
+    touch-action: manipulation;
+  }
+
+  #vote-result {
+    font-size: 1.5rem;
+  }
+
+  .big-badge {
+    font-size: large;
+  }
+}
+
+/* Ensure buttons have proper focus indicators for accessibility */
+.vote-btn:focus-visible {
+  outline: 3px solid #258cfb;
+  outline-offset: 2px;
+}
+
+/* Toast notifications */
+.toast-container {
+  z-index: 1060;
+}
+
+/* Skip to content link - visible only on focus */
+.visually-hidden-focusable {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.visually-hidden-focusable:focus {
+  position: absolute;
+  width: auto;
+  height: auto;
+  padding: 0.5rem 1rem;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* Smooth scrolling for skip link */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus outline for main content */
+#main-content:focus {
+  outline: none;
+}

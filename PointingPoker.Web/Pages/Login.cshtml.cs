@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using PointingPoker.Enums;
 using PointingPoker.Models;
+using Serilog;
 
 public class LoginModel : PageModel
 {
@@ -25,7 +26,8 @@ public class LoginModel : PageModel
 
         if (string.IsNullOrEmpty(jwtCookie))
         {
-            this.Username = _unknowName;
+            Username = _unknowName;
+            Log.Information($"User {Username} is on login page.");
             return;
         }
         
@@ -37,14 +39,16 @@ public class LoginModel : PageModel
         {
             var email = jwtToken.Claims.FirstOrDefault(c => c.Type == nameof(EnumCustomClaimType.Email).ToLower())?.Value;
 
-            this.Username = !string.IsNullOrEmpty(email) ? email.Split('@')[0] : _unknowName;
-
+            Username = !string.IsNullOrEmpty(email) ? email.Split('@')[0] : _unknowName;
+            Log.Information($"User {Username} is on login page.");
             return;
         }
         
         var authModel = JsonSerializer.Deserialize<AuthModel>(username!);
-
-        this.Username = authModel.Name;
+        
+        Username = authModel.Name;
+        
+        Log.Information($"User {Username} is on login page.");
     }
 
     public async Task<IActionResult> OnPostJoinSession([FromForm] string session, string username)
@@ -69,12 +73,12 @@ public class LoginModel : PageModel
     public async Task<IActionResult> OnPostCreateSession([FromForm] string session, string username)
     {
         this.Username = username;
-        
-        session = new Random().Next(MIN_SESSION_NUMBER, MAX_SESSION_NUMBER).ToString();
+
+        session = Random.Shared.Next(MIN_SESSION_NUMBER, MAX_SESSION_NUMBER).ToString();
 
         while (PointingPokerHub.DoesSessionExist(session))
         {
-            session = new Random().Next(MIN_SESSION_NUMBER, MAX_SESSION_NUMBER).ToString();
+            session = Random.Shared.Next(MIN_SESSION_NUMBER, MAX_SESSION_NUMBER).ToString();
         }
 
         return await SignInUser(session);

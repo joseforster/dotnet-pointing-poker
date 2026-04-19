@@ -1,3 +1,8 @@
+using System.Globalization;
+using PointingPoker.Enums;
+
+namespace PointingPoker.Models;
+
 public class VoteModel
 {
     public VoteModel(IEnumerable<UserModel> userModels)
@@ -30,7 +35,7 @@ public class VoteModel
 
         if (userCount != 0)
         {
-            var voteSum = usersThatVoted.Sum(s => decimal.Parse(s.CurrentVote));
+            var voteSum = usersThatVoted.Sum(s => decimal.Parse(s.CurrentVote, CultureInfo.InvariantCulture));
 
             var voteValue = voteSum / userCount;
             

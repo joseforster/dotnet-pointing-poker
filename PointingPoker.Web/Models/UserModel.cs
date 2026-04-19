@@ -1,3 +1,7 @@
+using PointingPoker.Enums;
+
+namespace PointingPoker.Models;
+
 public class UserModel
 {
     public UserModel(string connectionId, string username, string sessionId, string guid)
