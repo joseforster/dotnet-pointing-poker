@@ -12,20 +12,23 @@
         <div class="row m-2">
             <div id="watch-session-card" class="col card text-bg-light text-secondary p-2">
                 <div class="row align-items-center g-2">
-                    <div class="col-12 col-sm-6" id="watch-input-col">
+                    <div class="col-6 col-sm-4" id="watch-input-col">
                         <input id="input-watch-session-id" type="text" maxlength="4" class="form-control w-100"
                                placeholder="session to watch"/>
                     </div>
-                    <div class="col-12 col-sm-6" id="watch-btn-col">
+                    <div class="col-6 col-sm-2" id="watch-btn-col">
                         <button id="btn-watch-session" type="button" class="btn btn-outline-secondary w-100">watch
                         </button>
                     </div>
-                    <div class="col-12 col-sm-6 d-flex gap-2 align-items-stretch d-none" style="min-height: 38px;"
+                    <div class="col-12 col-sm-6 d-flex gap-2 align-items-stretch" style="min-height: 38px;"
                          id="watch-session-info">
                         <div class="card flex-fill text-bg-light text-secondary d-flex align-items-center justify-content-center">
+                            <span id="watch-session-placeholder" class="fw-light">no session being watched.</span>
+                        </div>
+                        <div class="card flex-fill text-bg-light text-secondary d-flex align-items-center justify-content-center d-none">
                             <span id="watch-session-id" class="fw-bold"></span>
                         </div>
-                        <div class="card flex-fill text-bg-light text-secondary d-flex align-items-center justify-content-center"
+                        <div class="card flex-fill text-bg-light text-secondary d-flex align-items-center justify-content-center d-none"
                              id="watch-session-votes-card">
                             <span id="watch-session-votes" class="fw-bold"></span>
                         </div>

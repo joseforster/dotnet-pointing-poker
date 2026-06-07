@@ -32,7 +32,6 @@
             <span class="navbar-brand text-primary">
                 <span class="fs-3 fw-semibold">Pointing</span>
                 <span class="fs-3 fw-bold">Poker</span>
-                <span class="badge rounded-pill text-bg-success ms-2" id="my-connection-status">connected</span>
             </span>
             @{
                 if (User.Identity != null && User.Identity.IsAuthenticated)
@@ -61,7 +60,7 @@
                 &copy; @DateTime.Now.Year - <strong>PointingPoker</strong>
             </span>
             <span class="badge bg-secondary">v@(FileVersionInfo.GetVersionInfo(GetType().Assembly.Location).FileVersion)</span>
-            <span class="badge bg-info text-dark">BETA</span>
+            <span class="badge text-bg-success" id="my-connection-status">connected</span>
         </div>
         <div class="d-flex align-items-center gap-3">
             <a href="https://github.com/joseforster/dotnet-pointing-poker" target="_blank"
