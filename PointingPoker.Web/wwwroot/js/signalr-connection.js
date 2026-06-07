@@ -135,14 +135,13 @@ connection.on("SessionToWatchError", function (error) {
 connection.on("SessionToWatchConnected", function (sessionId) {
     let watchSessionId = document.getElementById("watch-session-id");
     watchSessionId.textContent = `session ${sessionId}`;
+    watchSessionId.parentElement.classList.remove("d-none");
 
     let watchSessionVotes = document.getElementById("watch-session-votes");
     watchSessionVotes.textContent = "waiting";
+    watchSessionVotes.parentElement.classList.remove("d-none");
 
-    document.getElementById("watch-input-col").classList.replace("col-sm-6", "col-sm-3");
-    document.getElementById("watch-btn-col").classList.replace("col-sm-6", "col-sm-3");
-
-    document.getElementById("watch-session-info").classList.remove("d-none");
+    document.getElementById("watch-session-placeholder").parentElement.classList.add("d-none");
 });
 connection.on("SetVoteResultOnWatchSession", function (voteModel) {
     let watchSessionVotes = document.getElementById("watch-session-votes");
