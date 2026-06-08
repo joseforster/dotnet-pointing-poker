@@ -17,14 +17,6 @@ A simple planning poker web app for agile teams, featuring real-time voting, sec
 
 ---
 
-## 🖼️ Preview
-
-<img width="1913" height="929" alt="Screenshot from 2026-02-10 19-01-10" src="https://github.com/user-attachments/assets/c2db35e7-08ed-4c03-90fd-9bafdf15d008" />
-<img width="1913" height="929" alt="Screenshot from 2026-02-10 19-05-05" src="https://github.com/user-attachments/assets/0a991f70-cfbb-47a7-936a-9ef2966fdc58" />
-<img width="1913" height="929" alt="Screenshot from 2026-02-10 19-08-25" src="https://github.com/user-attachments/assets/99304bac-3358-4059-a55c-0499e58a0d20" />
-
----
-
 ## 🛠️ Tech Stack
 
 - **Backend:** ASP.NET Core, SignalR  
