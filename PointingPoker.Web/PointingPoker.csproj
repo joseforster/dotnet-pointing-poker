@@ -4,7 +4,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <FileVersion>2.0.0</FileVersion>
+    <FileVersion>2.0.1</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
