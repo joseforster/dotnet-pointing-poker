@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.SignalR;
-using PointingPoker.Hubs;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -27,12 +26,7 @@ try
         {
             s.EnableDetailedErrors = true;
         }
-
-        s.AddFilter<RateLimitFilter>();
     });
-
-    // Add background services
-    builder.Services.AddHostedService<PointingPoker.Services.SessionCleanupService>();
 
     builder.Services
         .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

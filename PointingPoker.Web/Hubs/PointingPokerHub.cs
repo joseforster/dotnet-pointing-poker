@@ -2,19 +2,12 @@ using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.SignalR;
 using PointingPoker.Enums;
-using PointingPoker.Hubs;
 using PointingPoker.Models;
-using PointingPoker.Services;
 using Serilog;
 
 public class PointingPokerHub : Hub
 {
     private static readonly ConcurrentDictionary<string, GroupModel> _groupsBySession = new();
-
-    public PointingPokerHub()
-    {
-        SessionCleanupService.RegisterGroups(_groupsBySession);    
-    }
     
     public override async Task OnConnectedAsync()
     {
@@ -69,8 +62,6 @@ public class PointingPokerHub : Hub
         }
 
         LogSessionCount();
-        
-        SessionCleanupService.UpdateActivity(sessionId);
     }
 
     private static void LogSessionCount()
@@ -125,8 +116,6 @@ public class PointingPokerHub : Hub
             await Clients.GroupExcept(sessionId, this.Context.ConnectionId)
                 .SendAsync("UserHasVoted", Context.ConnectionId);
         }
-        
-        SessionCleanupService.UpdateActivity(sessionId);
     }
 
     public async Task OnShowVotes()
@@ -147,8 +136,6 @@ public class PointingPokerHub : Hub
         await Clients.Group(sessionId).SendAsync("ShowVotes", groupModel.Users);
         await Clients.Group(sessionId).SendAsync("SetVoteResult", voteModel);
         await Clients.Clients(groupModel.Watchers).SendAsync("SetVoteResultOnWatchSession", voteModel);
-        
-        SessionCleanupService.UpdateActivity(sessionId);
     }
 
     public async Task OnClearVotes()
@@ -168,8 +155,6 @@ public class PointingPokerHub : Hub
 
         await Clients.Group(sessionId).SendAsync("ClearVotes");
         await Clients.Clients(groupModel.Watchers).SendAsync("ClearVotesOnWatchSession");
-        
-        SessionCleanupService.UpdateActivity(sessionId);
     }
 
     public async Task ExitSession()
@@ -189,8 +174,6 @@ public class PointingPokerHub : Hub
         var userModel = groupModel.GetUserModelByGuid(guid);
 
         await RemoveUserFromSession(connectionId, sessionId, userModel);
-        
-        RateLimitFilter.RemoveConnection(connectionId);
     }
 
     private async Task RemoveUserFromSession(string connectionId, string sessionId, UserModel userModel)
@@ -203,8 +186,6 @@ public class PointingPokerHub : Hub
         {
             return;
         }
-        
-        SessionCleanupService.UpdateActivity(sessionId);
 
         if (DoesSessionExist(sessionId))
         {
@@ -213,7 +194,6 @@ public class PointingPokerHub : Hub
             if (!groupModel.Users.Any())
             {
                 _groupsBySession.TryRemove(sessionId, out _);
-                SessionCleanupService.RemoveActivity(sessionId);
 
                 Log.Information("Session {SessionId} will be removed, {Username} was the last user.", sessionId,
                     userModel.Username);
@@ -237,8 +217,6 @@ public class PointingPokerHub : Hub
         Log.Information("User {Username} disconnected from session {SessionId}.", userModel.Username, sessionId);
 
         LogSessionCount();
-        
-        RateLimitFilter.RemoveConnection(connectionId);
     }
 
     public static bool DoesSessionExist(string sessionId)
@@ -293,8 +271,6 @@ public class PointingPokerHub : Hub
         await Clients.GroupExcept(session, connectionId, Context.ConnectionId).SendAsync("UserKickedFromSession",  userWhoKicked.Username, userThatWasKicked.Username);
         
         await OnClearVotes();
-        
-        SessionCleanupService.UpdateActivity(session);
     }
 
     private void RemoveWatcherFromOtherSessions()
